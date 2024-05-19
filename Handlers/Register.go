@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"strings"
+	"waterbase/Auth"
 	"waterbase/DocumentDB"
 )
 
@@ -54,6 +56,12 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Authenticated := Auth.KeyDB.CheckAdminKey(data)
+	if !Authenticated {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
 	if _, ok := data["name"].(string); !ok {
 		fmt.Println("Name not spesified in json")
 		return
@@ -75,7 +83,16 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	success := DocumentDB.DocDB.CreateNewService(service)
+	jsonData := make(map[string]interface{})
+	var success bool
+
+	jsonData["auth"], success = Auth.KeyDB.CreateAuthenticationKey(service.Name, 1000, rand.Intn(1000000))
+	if !success {
+		fmt.Println("Failed to create a auth key to the service")
+		return
+	}
+
+	success = DocumentDB.DocDB.CreateNewService(service)
 	if !success {
 		http.Error(w, "Failed to create a new service. Maybe it exists already?", http.StatusBadGateway)
 		fmt.Println("Failed to create a new service")
@@ -83,7 +100,14 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Error(w, "", http.StatusAccepted)
+	newData, err := json.Marshal(jsonData)
+	if err != nil {
+		fmt.Println("Failed to marshal return data")
+		return
+	}
+
+	w.Header().Add("content-type", "application/json")
+	w.Write(newData)
 }
 
 func RegisterCollection(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +144,13 @@ func RegisterCollection(w http.ResponseWriter, r *http.Request) {
 	name := data["name"].(string)
 	owner := data["owner"].(string)
 	servicename := data["servicename"].(string)
+
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
+	if !Authenticated {
+		fmt.Println("The user is not authenticated to make modifications")
+		fmt.Println(data)
+		return
+	}
 
 	if name == "" || owner == "" || servicename == "" {
 		fmt.Println("All fields must be filled to create a collection")
@@ -171,6 +202,13 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
+	if !Authenticated {
+		fmt.Println("The user is not authenticated to make modifications")
+		fmt.Println(data)
+		return
+	}
+
 	name := data["name"].(string)
 	owner := data["owner"].(string)
 	servicename := data["servicename"].(string)
@@ -201,7 +239,7 @@ body JSON
 {
 	name: "bfvbot" string
 	owner: "John" string
-	auth: <key> int // Future implementation
+	adminkey: <key> int
 }
 
 Resp: HTTP Status code
@@ -213,7 +251,7 @@ http://localhost:8080/register?type=collection
 	servicename: "bfvbot" string
 	name: "cheaters" string
 	owner: "John"
-	auth: <key> int // FI
+	auth: <key>
 }
 
 

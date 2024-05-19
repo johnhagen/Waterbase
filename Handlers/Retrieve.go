@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"waterbase/Auth"
 	"waterbase/DocumentDB"
+	"waterbase/Utils"
 )
 
 func RetrieveHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,8 +34,6 @@ func RetrieveGetHandler(w http.ResponseWriter, r *http.Request) {
 		GetService(w, r)
 
 	}
-
-	http.Error(w, "", http.StatusBadRequest)
 }
 
 func GetService(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +43,21 @@ func GetService(w http.ResponseWriter, r *http.Request) {
 	yes := DocumentDB.DocDB.GetService(service)
 	if yes == nil {
 		http.Error(w, "ERROR: Could not find the service", http.StatusBadRequest)
+		return
+	}
+
+	body, err := Utils.ReadFromJSON(r)
+	if err != nil {
+		fmt.Println("Utils" + err.Error())
+		return
+	}
+
+	body["servicename"] = service
+
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	if !Authenticated {
+		fmt.Println("User is not authenticated")
+		http.Error(w, "", http.StatusUnauthorized)
 		return
 	}
 
@@ -62,6 +77,21 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 	service := r.URL.Query().Get("service")
 	collection := r.URL.Query().Get("collection")
 
+	body, err := Utils.ReadFromJSON(r)
+	if err != nil {
+		fmt.Println("Utils" + err.Error())
+		return
+	}
+
+	body["servicename"] = service
+
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	if !Authenticated {
+		fmt.Println("User is not authenticated")
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
 	yes := DocumentDB.DocDB.GetService(service).GetCollection(collection)
 	if yes == nil {
 		http.Error(w, "ERROR: Could not find the collection", http.StatusBadRequest)
@@ -76,13 +106,27 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("content-type", "application/json")
 	w.Write(data)
-
 }
 
 func GetDocument(w http.ResponseWriter, r *http.Request) {
 	service := r.URL.Query().Get("service")
 	collection := r.URL.Query().Get("collection")
 	document := r.URL.Query().Get("document")
+
+	body, err := Utils.ReadFromJSON(r)
+	if err != nil {
+		fmt.Println("Utils" + err.Error())
+		return
+	}
+
+	body["servicename"] = service
+
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	if !Authenticated {
+		fmt.Println("User is not authenticated")
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
 
 	yes := DocumentDB.DocDB.GetService(service).GetCollection(collection).GetDocument(document)
 	if yes == nil {

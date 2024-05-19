@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"waterbase/Auth"
 	"waterbase/DocumentDB"
 	handlers "waterbase/Handlers"
 )
@@ -20,6 +21,7 @@ func main() {
 		port = "8080"
 	}
 
+	Auth.KeyDB.Init()
 	DocumentDB.DocDB.InitDB()
 
 	// Configure handler endpoints

@@ -50,7 +50,7 @@ func (d *DocumentDB) CreateNewService(r Service) bool {
 	service.Owner = r.Owner
 
 	d.Services[r.Name] = &service
-	fmt.Println("Created service " + r.Name)
+	fmt.Println("Created service: " + r.Name)
 	return true
 }
 
@@ -79,7 +79,7 @@ func (s *Service) CreateNewCollection(name string, owner string) bool {
 	collection.Owner = owner
 
 	s.Collections[name] = &collection
-	fmt.Println("Created collection " + name)
+	fmt.Println("Created collection: " + name)
 	return true
 }
 
@@ -122,7 +122,7 @@ func (c *Collection) CreateNewDocument(name string, owner string, content interf
 	document.Content = content
 
 	c.Documents[name] = &document
-	fmt.Println("Created document" + name)
+	fmt.Println("Created document: " + name)
 	return true
 }
 
