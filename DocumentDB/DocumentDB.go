@@ -1,20 +1,26 @@
 package DocumentDB
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 var DocDB DocumentDB
 
 type DocumentDB struct {
+	M        sync.Mutex
 	Services map[string]*Service
 }
 
 type Service struct {
+	//sLock       sync.Mutex
 	Name        string `json:"name"`
 	Owner       string `json:"owner"`
 	Collections map[string]*Collection
 }
 
 type Collection struct {
+	//cLock       sync.Mutex
 	Name        string `json:"name"`
 	Owner       string `json:"owner"`
 	LastUpdated string
@@ -38,8 +44,10 @@ func (d *DocumentDB) InitDB() {
 
 func (d *DocumentDB) CreateNewService(r Service) bool {
 
+	d.M.Lock()
 	if _, exist := d.Services[r.Name]; exist {
 		fmt.Println("Service with the name " + r.Name + " already exists")
+		d.M.Unlock()
 		return false
 	}
 
@@ -50,16 +58,21 @@ func (d *DocumentDB) CreateNewService(r Service) bool {
 	service.Owner = r.Owner
 
 	d.Services[r.Name] = &service
+
 	fmt.Println("Created service: " + r.Name)
+	d.M.Unlock()
 	return true
 }
 
 func (d *DocumentDB) GetService(name string) *Service {
+	d.M.Lock()
 	if _, exist := d.Services[name]; !exist {
 		fmt.Println("Could not find service " + name)
+		d.M.Unlock()
 		return nil
 	}
 
+	d.M.Unlock()
 	return d.Services[name]
 }
 
@@ -67,8 +80,10 @@ func (d *DocumentDB) GetService(name string) *Service {
 
 func (s *Service) CreateNewCollection(name string, owner string) bool {
 
+	DocDB.M.Lock()
 	if _, exist := s.Collections[name]; exist {
 		fmt.Println("Collection with the name " + name + " already exists")
+		DocDB.M.Unlock()
 		return false
 	}
 
@@ -80,28 +95,33 @@ func (s *Service) CreateNewCollection(name string, owner string) bool {
 
 	s.Collections[name] = &collection
 	fmt.Println("Created collection: " + name)
+	DocDB.M.Unlock()
 	return true
 }
 
 func (s *Service) DeleteCollection(name string) bool {
-
+	DocDB.M.Lock()
 	if _, exist := s.Collections[name]; !exist {
 		fmt.Println("Collection with the name " + name + " don't exist")
+		DocDB.M.Unlock()
 		return false
 	}
 
 	delete(s.Collections, name)
 	fmt.Println("Deleted document " + name + " from " + s.Name)
+	DocDB.M.Unlock()
 	return true
 }
 
 func (s *Service) GetCollection(name string) *Collection {
-
+	DocDB.M.Lock()
 	if _, exist := s.Collections[name]; !exist {
 		fmt.Println("Collection with the name " + name + " don't exist")
+		DocDB.M.Unlock()
 		return nil
 	}
 
+	DocDB.M.Unlock()
 	return s.Collections[name]
 }
 
@@ -109,8 +129,10 @@ func (s *Service) GetCollection(name string) *Collection {
 
 func (c *Collection) CreateNewDocument(name string, owner string, content interface{}) bool {
 
+	DocDB.M.Lock()
 	if _, exist := c.Documents[name]; exist {
 		fmt.Println("document with the name " + name + " already exists")
+		DocDB.M.Unlock()
 		return false
 	}
 
@@ -123,43 +145,49 @@ func (c *Collection) CreateNewDocument(name string, owner string, content interf
 
 	c.Documents[name] = &document
 	fmt.Println("Created document: " + name)
+	DocDB.M.Unlock()
 	return true
 }
 
 func (c *Collection) DeleteDocument(name string) bool {
 
+	DocDB.M.Lock()
 	if _, exist := c.Documents[name]; !exist {
 		fmt.Println("document with the name " + name + " don't exist")
+		DocDB.M.Unlock()
 		return false
 	}
 
 	delete(c.Documents, name)
 	fmt.Println("Deleted document " + name + " from " + c.Name)
+	DocDB.M.Unlock()
 	return true
 }
 
 func (c *Collection) GetDocument(name string) *Document {
-
+	DocDB.M.Lock()
 	if _, exist := c.Documents[name]; !exist {
 		fmt.Println("document with the name " + name + " don't exist")
+		DocDB.M.Unlock()
 		return nil
 	}
 
+	DocDB.M.Unlock()
 	return c.Documents[name]
 }
 
 // -------------------------------------------------------------- DOCUMENT FUNCTIONS --------------------------------------------------------------------
 
 func (d *Document) GetContent() interface{} {
-
 	return d.Content
-
 }
 
 func (d *Document) SetContent(name string, content interface{}) bool {
 
+	DocDB.M.Lock()
 	d.UpdatedBy = name
 	d.Content = content
+	DocDB.M.Unlock()
 	return true
 
 }
