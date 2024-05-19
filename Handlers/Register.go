@@ -177,8 +177,8 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 	collectionname := data["collectionname"].(string)
 
 	if name == "" || owner == "" || servicename == "" || collectionname == "" {
-		fmt.Println("All fields must be filled to create a collection")
-		http.Error(w, "All fields must be filled to create a collection", http.StatusBadRequest)
+		fmt.Println("All fields must be filled to create a document")
+		http.Error(w, "All fields must be filled to create a document", http.StatusBadRequest)
 		return
 	}
 
