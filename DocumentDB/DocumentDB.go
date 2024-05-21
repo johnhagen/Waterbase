@@ -1,7 +1,9 @@
 package DocumentDB
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"sync"
 )
 
@@ -9,30 +11,30 @@ var DocDB DocumentDB
 
 type DocumentDB struct {
 	M        sync.Mutex
-	Services map[string]*Service
+	Services map[string]*Service `json:"services"`
 }
 
 type Service struct {
 	//sLock       sync.Mutex
-	Name        string `json:"name"`
-	Owner       string `json:"owner"`
-	Collections map[string]*Collection
+	Name        string                 `json:"name"`
+	Owner       string                 `json:"owner"`
+	Collections map[string]*Collection `json:"collections"`
 }
 
 type Collection struct {
 	//cLock       sync.Mutex
-	Name        string `json:"name"`
-	Owner       string `json:"owner"`
-	LastUpdated string
-	Documents   map[string]*Document
+	Name        string               `json:"name"`
+	Owner       string               `json:"owner"`
+	LastUpdated string               `json:"lastUpdated"`
+	Documents   map[string]*Document `json:"documents"`
 }
 
 type Document struct {
-	UpdatedBy    string
-	Name         string `json:"name"`
-	Owner        string `json:"owner"`
-	CreationDate string
-	LastUpdated  string
+	UpdatedBy    string      `json:"updatedBy"`
+	Name         string      `json:"name"`
+	Owner        string      `json:"owner"`
+	CreationDate string      `json:"creationDate"`
+	LastUpdated  string      `json:"lastUpdated"`
 	Content      interface{} `json:"content"`
 }
 
@@ -60,6 +62,7 @@ func (d *DocumentDB) CreateNewService(r Service) bool {
 	d.Services[r.Name] = &service
 
 	fmt.Println("Created service: " + r.Name)
+	d.SaveDocDB()
 	d.M.Unlock()
 	return true
 }
@@ -74,6 +77,38 @@ func (d *DocumentDB) GetService(name string) *Service {
 
 	d.M.Unlock()
 	return d.Services[name]
+}
+
+func (d *DocumentDB) SaveDocDB() {
+
+	data, err := json.Marshal(d.Services)
+	if err != nil {
+		fmt.Println("DOCDB: " + err.Error())
+		return
+	}
+
+	err = os.WriteFile("DocDB", data, 0666)
+	if err != nil {
+		fmt.Println("DOCDB: " + err.Error())
+		return
+	}
+	fmt.Println("Saved DOCDB!")
+}
+
+func (d *DocumentDB) ReadDocDB() {
+
+	data, err := os.ReadFile("DocDB")
+	if err != nil {
+		fmt.Println("DOCDB: " + err.Error())
+		return
+	}
+
+	err = json.Unmarshal(data, &d.Services)
+	if err != nil {
+		fmt.Println("DOCDB: " + err.Error())
+		return
+	}
+	fmt.Println("Read DocDB file!")
 }
 
 // -------------------------------------------------------------- SERVICE FUNCTIONS --------------------------------------------------------------------
@@ -95,6 +130,7 @@ func (s *Service) CreateNewCollection(name string, owner string) bool {
 
 	s.Collections[name] = &collection
 	fmt.Println("Created collection: " + name)
+	DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
 }
@@ -109,6 +145,7 @@ func (s *Service) DeleteCollection(name string) bool {
 
 	delete(s.Collections, name)
 	fmt.Println("Deleted document " + name + " from " + s.Name)
+	DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
 }
@@ -145,6 +182,7 @@ func (c *Collection) CreateNewDocument(name string, owner string, content interf
 
 	c.Documents[name] = &document
 	fmt.Println("Created document: " + name)
+	DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
 }
@@ -160,6 +198,7 @@ func (c *Collection) DeleteDocument(name string) bool {
 
 	delete(c.Documents, name)
 	fmt.Println("Deleted document " + name + " from " + c.Name)
+	DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
 }
@@ -187,6 +226,7 @@ func (d *Document) SetContent(name string, content interface{}) bool {
 	DocDB.M.Lock()
 	d.UpdatedBy = name
 	d.Content = content
+	DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
 

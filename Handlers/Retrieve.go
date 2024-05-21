@@ -20,17 +20,18 @@ func RetrieveHandler(w http.ResponseWriter, r *http.Request) {
 
 func RetrieveGetHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
+	service := query.Get("service")
+	collection := query.Get("collection")
+	document := query.Get("document")
 
-	if query.Has("collection") && query.Has("service") && query.Has("document") {
-
+	if service != "" && collection != "" && document != "" {
 		GetDocument(w, r)
 
-	} else if query.Has("collection") && query.Has("service") {
-
+	} else if service != "" && collection != "" && document == "" {
+		fmt.Println("ye")
 		GetCollection(w, r)
 
-	} else if query.Has("service") {
-
+	} else if service != "" && collection == "" && document == "" {
 		GetService(w, r)
 
 	}
@@ -40,35 +41,45 @@ func GetService(w http.ResponseWriter, r *http.Request) {
 
 	service := r.URL.Query().Get("service")
 
-	yes := DocumentDB.DocDB.GetService(service)
-	if yes == nil {
+	Sfind := DocumentDB.DocDB.GetService(service)
+	if Sfind == nil {
 		http.Error(w, "ERROR: Could not find the service", http.StatusBadRequest)
 		return
 	}
 
-	body, err := Utils.ReadFromJSON(r)
+	//body, err := io.ReadAll(r.Body)
+	data, err := Utils.ReadFromJSON(r)
 	if err != nil {
-		fmt.Println("Utils" + err.Error())
+		http.Error(w, "", http.StatusBadRequest)
+		fmt.Println("Utils " + err.Error())
 		return
 	}
 
-	body["servicename"] = service
+	//data := make(map[string]interface{})
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	//err = json.Unmarshal(body, &data)
+	//if err != nil {
+	//	http.Error(w, "", http.StatusBadRequest)
+	//	fmt.Println("Utils " + err.Error())
+	//	return
+	//}
+
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
 	if !Authenticated {
 		fmt.Println("User is not authenticated")
 		http.Error(w, "", http.StatusUnauthorized)
 		return
 	}
 
-	data, err := json.Marshal(*yes)
+	jsonData, err := json.Marshal(*Sfind)
 	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
 		fmt.Println("fuck off ser")
 		return
 	}
 
 	w.Header().Add("content-type", "application/json")
-	w.Write(data)
+	w.Write(jsonData)
 
 }
 
@@ -77,15 +88,20 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 	service := r.URL.Query().Get("service")
 	collection := r.URL.Query().Get("collection")
 
-	body, err := Utils.ReadFromJSON(r)
+	fmt.Println(service)
+	fmt.Println(collection)
+
+	data, err := Utils.ReadFromJSON(r)
 	if err != nil {
 		fmt.Println("Utils" + err.Error())
 		return
 	}
 
-	body["servicename"] = service
+	fmt.Println(data)
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	data["servicename"] = service
+
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
 	if !Authenticated {
 		fmt.Println("User is not authenticated")
 		http.Error(w, "", http.StatusUnauthorized)
@@ -98,14 +114,16 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(*yes)
+	fmt.Println(*yes)
+
+	jsonData, err := json.Marshal(&yes)
 	if err != nil {
 		fmt.Println("fuck off col")
 		return
 	}
 
 	w.Header().Add("content-type", "application/json")
-	w.Write(data)
+	w.Write(jsonData)
 }
 
 func GetDocument(w http.ResponseWriter, r *http.Request) {

@@ -21,8 +21,10 @@ func main() {
 		port = "8080"
 	}
 
-	Auth.KeyDB.Init()
+	Auth.KeyDB.Init("Keks", 100)
 	DocumentDB.DocDB.InitDB()
+	Auth.KeyDB.ReadDB()
+	DocumentDB.DocDB.ReadDocDB()
 
 	// Configure handler endpoints
 	http.HandleFunc("/waterbase/register", handlers.RegisterHandler)

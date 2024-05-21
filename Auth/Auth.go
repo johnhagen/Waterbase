@@ -1,29 +1,33 @@
 package Auth
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"sync"
 )
 
 var KeyDB KeyBase
 
 type KeyBase struct {
-	m        sync.Mutex
-	keys     map[string]string
-	adminKey string
+	m         sync.Mutex
+	Keys      map[string]string `json:"keys"`
+	KeyLength int               `json:"keyLength"`
+	AdminKey  string            `json:"adminKey"`
 }
 
-func (k *KeyBase) Init() {
+func (k *KeyBase) Init(adminKey string, keyLength int) {
 	// Map service name to key
-	k.keys = make(map[string]string)
-	k.adminKey = "Keks"
+	k.Keys = make(map[string]string)
+	k.AdminKey = adminKey
+	k.KeyLength = keyLength
 }
 
 func (k *KeyBase) CreateAuthenticationKey(name string, keylength int, seed int) (string, bool) {
 
 	k.m.Lock()
-	if _, exist := k.keys[name]; exist {
+	if _, exist := k.Keys[name]; exist {
 		fmt.Println("Key already exists to that name")
 		k.m.Unlock()
 		return "", false
@@ -36,7 +40,7 @@ func (k *KeyBase) CreateAuthenticationKey(name string, keylength int, seed int) 
 		key += string(char[rand.Intn(seed)%16])
 	}
 
-	k.keys[name] = key
+	k.Keys[name] = key
 	k.m.Unlock()
 	return key, true
 }
@@ -56,14 +60,14 @@ func (k *KeyBase) CheckAuthenticationKey(s map[string]interface{}) bool {
 		return false
 	}
 
-	if _, exist := k.keys[s["servicename"].(string)]; !exist {
+	if _, exist := k.Keys[s["servicename"].(string)]; !exist {
 		fmt.Println("Key does not exist")
 		k.m.Unlock()
 		return false
 	}
 
-	if s["auth"].(string) == k.keys[s["servicename"].(string)] {
-		fmt.Println("Key: " + k.keys[s["servicename"].(string)] + " for service: " + s["servicename"].(string) + " is authenticated")
+	if s["auth"].(string) == k.Keys[s["servicename"].(string)] {
+		fmt.Println("Key: " + k.Keys[s["servicename"].(string)] + " for service: " + s["servicename"].(string) + " is authenticated")
 		k.m.Unlock()
 		return true
 	}
@@ -82,7 +86,7 @@ func (k *KeyBase) CheckAdminKey(s map[string]interface{}) bool {
 		return false
 	}
 
-	if k.adminKey == s["adminkey"].(string) {
+	if k.AdminKey == s["adminkey"].(string) {
 		fmt.Println("Admin key match")
 		k.m.Unlock()
 		return true
@@ -91,4 +95,34 @@ func (k *KeyBase) CheckAdminKey(s map[string]interface{}) bool {
 	fmt.Println("Admin key missmatch")
 	k.m.Unlock()
 	return false
+}
+
+func (k *KeyBase) SaveDB() {
+
+	data, err := json.Marshal(k.Keys)
+	if err != nil {
+		fmt.Println("SAVEKEY: " + err.Error())
+		return
+	}
+
+	err = os.WriteFile("KeyDB", data, 0666)
+	if err != nil {
+		fmt.Println("SAVEKEY: " + err.Error())
+		return
+	}
+}
+
+func (k *KeyBase) ReadDB() {
+	data, err := os.ReadFile("KeyDB")
+	if err != nil {
+		fmt.Println("READKEY: " + err.Error())
+		return
+	}
+
+	err = json.Unmarshal(data, &k.Keys)
+	if err != nil {
+		fmt.Println("READKEY: " + err.Error())
+		return
+	}
+	fmt.Println("Inserted KEYDB File")
 }

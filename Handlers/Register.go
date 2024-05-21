@@ -106,6 +106,7 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Auth.KeyDB.SaveDB()
 	w.Header().Add("content-type", "application/json")
 	w.Write(newData)
 }
@@ -163,6 +164,7 @@ func RegisterCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("Collection finish")
 	http.Error(w, "", http.StatusAccepted)
 }
 

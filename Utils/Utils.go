@@ -8,15 +8,16 @@ import (
 
 func ReadFromJSON(r *http.Request) (map[string]interface{}, error) {
 
+	data := make(map[string]interface{})
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return data, err
 	}
 
-	var data map[string]interface{}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return data, err
 	}
 
 	return data, nil
