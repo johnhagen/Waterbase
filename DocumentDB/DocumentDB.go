@@ -87,7 +87,7 @@ func (d *DocumentDB) SaveDocDB() {
 		return
 	}
 
-	err = os.WriteFile("DocDB", data, 0666)
+	err = os.WriteFile("ServiceDB", data, 0666)
 	if err != nil {
 		fmt.Println("DOCDB: " + err.Error())
 		return
@@ -95,9 +95,45 @@ func (d *DocumentDB) SaveDocDB() {
 	fmt.Println("Saved DOCDB!")
 }
 
+func (d *DocumentDB) NewSaveDocDB() {
+	err := os.MkdirAll("./DocDB", os.ModePerm)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	for _, g := range d.Services {
+
+		err := os.MkdirAll("./DocDB/"+g.Name, os.ModePerm)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		// Shits fucked
+
+		data, err := json.Marshal(&g)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		file, err := os.Create("./DocDB/" + g.Name)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		_, err = file.Write(data)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		file.Close()
+	}
+}
+
 func (d *DocumentDB) ReadDocDB() {
 
-	data, err := os.ReadFile("DocDB")
+	data, err := os.ReadFile("ServiceDB")
 	if err != nil {
 		fmt.Println("DOCDB: " + err.Error())
 		return
