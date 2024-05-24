@@ -86,7 +86,7 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 	jsonData := make(map[string]interface{})
 	var success bool
 
-	jsonData["auth"], success = Auth.KeyDB.CreateAuthenticationKey(service.Name, 1000, rand.Intn(1000000))
+	jsonData["auth"], success = Auth.KeyDB.CreateAuthenticationKey(service.Name, 32, rand.Intn(1000000))
 	if !success {
 		fmt.Println("Failed to create a auth key to the service")
 		return
@@ -163,8 +163,8 @@ func RegisterCollection(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Could not create collection")
 		return
 	}
+	DocumentDB.DocDB.GetService(servicename).GetCollection(name).SaveCollection("./Save/" + servicename)
 
-	fmt.Println("Collection finish")
 	http.Error(w, "", http.StatusAccepted)
 }
 
@@ -228,6 +228,8 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ERROR: Could not create document", http.StatusBadRequest)
 		return
 	}
+
+	DocumentDB.DocDB.GetService(servicename).GetCollection(collectionname).GetDocument(name).SaveDocument("./Save/" + servicename + "/" + collectionname)
 
 	http.Error(w, "", http.StatusAccepted)
 }

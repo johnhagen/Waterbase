@@ -26,14 +26,10 @@ func RetrieveGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	if service != "" && collection != "" && document != "" {
 		GetDocument(w, r)
-
 	} else if service != "" && collection != "" && document == "" {
-		fmt.Println("ye")
 		GetCollection(w, r)
-
 	} else if service != "" && collection == "" && document == "" {
 		GetService(w, r)
-
 	}
 }
 
@@ -88,16 +84,11 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 	service := r.URL.Query().Get("service")
 	collection := r.URL.Query().Get("collection")
 
-	fmt.Println(service)
-	fmt.Println(collection)
-
 	data, err := Utils.ReadFromJSON(r)
 	if err != nil {
 		fmt.Println("Utils" + err.Error())
 		return
 	}
-
-	fmt.Println(data)
 
 	data["servicename"] = service
 
@@ -113,8 +104,6 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ERROR: Could not find the collection", http.StatusBadRequest)
 		return
 	}
-
-	fmt.Println(*yes)
 
 	jsonData, err := json.Marshal(&yes)
 	if err != nil {

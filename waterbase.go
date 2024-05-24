@@ -23,12 +23,13 @@ func main() {
 
 	Auth.KeyDB.Init("Keks", 100)
 	DocumentDB.DocDB.InitDB()
+	DocumentDB.DocDB.NewLoadDB()
 	Auth.KeyDB.ReadDB()
-	DocumentDB.DocDB.ReadDocDB()
 
 	// Configure handler endpoints
 	http.HandleFunc("/waterbase/register", handlers.RegisterHandler)
 	http.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
+	http.HandleFunc("/waterbase/remove", handlers.RemoveHandler)
 
 	// Start HTTP Server
 	log.Println("Starting server on port " + port + "...")

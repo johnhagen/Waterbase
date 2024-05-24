@@ -97,6 +97,18 @@ func (k *KeyBase) CheckAdminKey(s map[string]interface{}) bool {
 	return false
 }
 
+func (k *KeyBase) DeleteKey(name string) bool {
+
+	if _, exist := k.Keys[name]; !exist {
+		fmt.Println("Key does not exist")
+		return false
+	}
+
+	delete(k.Keys, name)
+	k.SaveDB()
+	return true
+}
+
 func (k *KeyBase) SaveDB() {
 
 	data, err := json.Marshal(k.Keys)
