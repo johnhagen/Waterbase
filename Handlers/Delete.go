@@ -130,4 +130,40 @@ func DeleteCollection(w http.ResponseWriter, r *http.Request) {
 
 func DeleteDocument(w http.ResponseWriter, r *http.Request) {
 
+	body, err := Utils.ReadFromJSON(r)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	serString := Utils.IsString(body["servicename"])
+	colString := Utils.IsString(body["collectionname"])
+	docString := Utils.IsString(body["documentname"])
+	autString := Utils.IsString(body["auth"])
+
+	if !serString || !autString || !colString || !docString {
+		fmt.Println("Missing servicename, collectionname, documentname or auth")
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	ser := body["servicename"].(string)
+	col := body["collectionname"].(string)
+	doc := body["documentname"].(string)
+
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	if !Authenticated {
+		fmt.Println("Failed to authenticate")
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	success := DocumentDB.DocDB.GetService(ser).GetCollection(col).DeleteDocument(doc)
+	if !success {
+		fmt.Println("Failed to delete collection")
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	http.Error(w, "", http.StatusAccepted)
 }

@@ -24,6 +24,7 @@ type Service struct {
 
 type Collection struct {
 	//cLock       sync.Mutex
+	ServiceName string               `json:"servicename"`
 	Name        string               `json:"name"`
 	Owner       string               `json:"owner"`
 	LastUpdated string               `json:"lastUpdated"`
@@ -244,6 +245,7 @@ func (s *Service) CreateNewCollection(name string, owner string) bool {
 	var collection Collection
 
 	collection.Documents = make(map[string]*Document)
+	collection.ServiceName = s.Name
 	collection.Name = name
 	collection.Owner = owner
 
@@ -265,10 +267,14 @@ func (s *Service) DeleteCollection(name string) bool {
 	err := os.RemoveAll("./Save/" + s.Name + "/" + name + "/")
 	if err != nil {
 		fmt.Println(err.Error())
+		DocDB.M.Unlock()
+		return false
 	}
 	err = os.Remove("./Save/" + s.Name + "/" + name + "__")
 	if err != nil {
 		fmt.Println(err.Error())
+		DocDB.M.Unlock()
+		return false
 	}
 	delete(s.Collections, name)
 	fmt.Println("Deleted document: " + name + " from service: " + s.Name)
@@ -359,7 +365,14 @@ func (c *Collection) DeleteDocument(name string) bool {
 	}
 
 	delete(c.Documents, name)
+	err := os.Remove("./Save/" + c.ServiceName + "/" + c.Name + "/" + name)
+	if err != nil {
+		fmt.Println(err.Error())
+		DocDB.M.Unlock()
+		return false
+	}
 	fmt.Println("Deleted document " + name + " from " + c.Name)
+
 	//DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true

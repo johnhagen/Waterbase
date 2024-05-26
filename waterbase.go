@@ -27,6 +27,7 @@ func main() {
 	Auth.KeyDB.ReadDB()
 
 	// Configure handler endpoints
+	http.HandleFunc("/waterbase/transmitt", handlers.TransmittHandler)
 	http.HandleFunc("/waterbase/register", handlers.RegisterHandler)
 	http.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
 	http.HandleFunc("/waterbase/remove", handlers.RemoveHandler)

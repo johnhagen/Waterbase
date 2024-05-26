@@ -19,6 +19,7 @@ func RetrieveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RetrieveGetHandler(w http.ResponseWriter, r *http.Request) {
+
 	query := r.URL.Query()
 	service := query.Get("service")
 	collection := query.Get("collection")
@@ -123,6 +124,7 @@ func GetDocument(w http.ResponseWriter, r *http.Request) {
 	body, err := Utils.ReadFromJSON(r)
 	if err != nil {
 		fmt.Println("Utils" + err.Error())
+		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
@@ -144,6 +146,7 @@ func GetDocument(w http.ResponseWriter, r *http.Request) {
 	data, err := json.Marshal(*yes)
 	if err != nil {
 		fmt.Println("fuck off doc")
+		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
