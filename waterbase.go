@@ -23,7 +23,7 @@ func main() {
 
 	Auth.KeyDB.Init("Keks", 100)
 	DocumentDB.DocDB.InitDB()
-	DocumentDB.DocDB.NewLoadDB()
+	//DocumentDB.DocDB.NewLoadDB()
 	Auth.KeyDB.ReadDB()
 
 	// Configure handler endpoints

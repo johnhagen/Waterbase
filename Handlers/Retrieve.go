@@ -106,6 +106,8 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(yes)
+
 	jsonData, err := json.Marshal(&yes)
 	if err != nil {
 		fmt.Println("fuck off col")

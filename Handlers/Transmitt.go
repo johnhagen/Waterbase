@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"waterbase/Auth"
+	consts "waterbase/Data"
 	"waterbase/DocumentDB"
 	"waterbase/Utils"
 )
@@ -106,10 +108,16 @@ func TransmittGetDocuments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	files, err := os.ReadDir(consts.DEFAULT_SAVE + data["servicename"].(string) + "/" + data["collectionname"].(string) + "/")
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
 	var docNames []string
 
-	for g := range collection.Documents {
-		docNames = append(docNames, g)
+	for _, h := range files {
+		docNames = append(docNames, h.Name())
 	}
 
 	jsonData, err := json.Marshal(docNames)

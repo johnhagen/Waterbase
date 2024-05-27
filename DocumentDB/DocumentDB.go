@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"sync"
 	"waterbase/Auth"
+	consts "waterbase/Data"
 )
 
 var DocDB DocumentDB
@@ -27,6 +27,7 @@ type Collection struct {
 	ServiceName string               `json:"servicename"`
 	Name        string               `json:"name"`
 	Owner       string               `json:"owner"`
+	AuthKey     string               `json:"auth"`
 	LastUpdated string               `json:"lastUpdated"`
 	Documents   map[string]*Document `json:"documents"`
 }
@@ -54,20 +55,18 @@ func (d *DocumentDB) InitDB() {
 func (d *DocumentDB) CreateNewService(r Service) bool {
 
 	d.M.Lock()
-	if _, exist := d.Services[r.Name]; exist {
-		fmt.Println("Service with the name " + r.Name + " already exists")
+	_, err := os.ReadFile(consts.DEFAULT_SAVE + r.Name + "__")
+	if err == nil {
+		fmt.Println("Service already exists: " + r.Name)
 		d.M.Unlock()
 		return false
 	}
 
 	service := Service{}
-
 	service.Collections = make(map[string]*Collection)
 	service.Name = r.Name
 	service.Owner = r.Owner
-
-	d.Services[r.Name] = &service
-	d.Services[r.Name].SaveService("./Save")
+	service.SaveService(consts.DEFAULT_SAVE)
 
 	fmt.Println("Created service: " + r.Name)
 	d.M.Unlock()
@@ -76,168 +75,54 @@ func (d *DocumentDB) CreateNewService(r Service) bool {
 
 func (d *DocumentDB) GetService(name string) *Service {
 	d.M.Lock()
-	if _, exist := d.Services[name]; !exist {
-		fmt.Println("Could not find service " + name)
+	file, err := os.ReadFile(consts.DEFAULT_SAVE + name + "__")
+	if err != nil {
+		fmt.Println(err.Error())
 		d.M.Unlock()
 		return nil
 	}
 
+	data := make(map[string]interface{})
+
+	err = json.Unmarshal(file, &data)
+	if err != nil {
+		fmt.Println(err.Error())
+		d.M.Unlock()
+		return nil
+	}
+
+	ser := Service{}
+
+	ser.Name = data["name"].(string)
+	ser.Owner = data["owner"].(string)
+	ser.Collections = make(map[string]*Collection)
+
 	d.M.Unlock()
-	return d.Services[name]
+	return &ser
 }
 
 func (d *DocumentDB) DeleteService(name string) bool {
 	d.M.Lock()
-	if _, exist := d.Services[name]; exist {
-		delete(d.Services, name)
-		Auth.KeyDB.DeleteKey(name)
-		os.RemoveAll("./Save/" + name + "/")
-		os.Remove("./Save/" + name + "__")
-		if _, exists := d.Services[name]; !exists {
-			d.M.Unlock()
-			return true
-		}
-		d.M.Unlock()
-		return false
-	}
+
+	Auth.KeyDB.DeleteKey(name)
+	os.RemoveAll("./Save/" + name + "/")
+	os.Remove("./Save/" + name + "__")
+
 	d.M.Unlock()
-	return false
-}
-
-func (d *DocumentDB) NewLoadDB() {
-
-	DEFAULT_SAVE_LOCATION := "./Save/"
-	services, err := os.ReadDir(DEFAULT_SAVE_LOCATION)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	for _, ser := range services {
-
-		if strings.Contains(ser.Name(), "__") {
-
-			serData, err := os.ReadFile(DEFAULT_SAVE_LOCATION + ser.Name())
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-
-			sData := make(map[string]interface{})
-
-			err = json.Unmarshal(serData, &sData)
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-
-			service := Service{}
-
-			service.Name = sData["name"].(string)
-			service.Owner = sData["owner"].(string)
-
-			DocDB.CreateNewService(service)
-			serv := DocDB.GetService(service.Name)
-
-			serFolder, _, _ := strings.Cut(ser.Name(), "__")
-
-			//fmt.Println("Search collection: " + DEFAULT_SAVE_LOCATION + serFolder)
-
-			collections, err := os.ReadDir(DEFAULT_SAVE_LOCATION + serFolder)
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-
-			for _, h := range collections {
-				if strings.Contains(h.Name(), "__") {
-
-					colPath := DEFAULT_SAVE_LOCATION + serFolder + "/" + h.Name()
-					cFolder, _, _ := strings.Cut(h.Name(), "__")
-					colFolder := DEFAULT_SAVE_LOCATION + serFolder + "/" + cFolder
-
-					colData, err := os.ReadFile(colPath)
-					if err != nil {
-						fmt.Println(err.Error())
-						return
-					}
-
-					cData := make(map[string]interface{})
-
-					err = json.Unmarshal(colData, &cData)
-					if err != nil {
-						fmt.Println(err.Error())
-						return
-					}
-
-					err = json.Unmarshal(colData, &cData)
-					if err != nil {
-						fmt.Println(err.Error())
-						return
-					}
-
-					serv.CreateNewCollection(cData["name"].(string), cData["owner"].(string))
-
-					newCol := serv.GetCollection(cData["name"].(string))
-
-					//fmt.Println(colPath)
-
-					//_ = newCol
-
-					documents, err := os.ReadDir(colFolder)
-					if err != nil {
-						fmt.Println(err.Error())
-						return
-					}
-
-					for _, l := range documents {
-
-						fileData, err := os.ReadFile(colFolder + "/" + l.Name())
-						if err != nil {
-							fmt.Println(err.Error())
-							return
-						}
-
-						file := make(map[string]interface{})
-
-						err = json.Unmarshal(fileData, &file)
-						if err != nil {
-							fmt.Println(err.Error())
-							return
-						}
-
-						newCol.CreateNewDocument(file["name"].(string), file["owner"].(string), file["content"])
-					}
-				}
-			}
-		}
-	}
-	fmt.Println("Finished loading saved services!")
-}
-
-func (d *DocumentDB) ReadDocDB() {
-
-	data, err := os.ReadFile("ServiceDB")
-	if err != nil {
-		fmt.Println("DOCDB: " + err.Error())
-		return
-	}
-
-	err = json.Unmarshal(data, &d.Services)
-	if err != nil {
-		fmt.Println("DOCDB: " + err.Error())
-		return
-	}
-	fmt.Println("Read DocDB file!")
+	return true
 }
 
 // -------------------------------------------------------------- SERVICE FUNCTIONS --------------------------------------------------------------------
 
 func (s *Service) CreateNewCollection(name string, owner string) bool {
-
+	fmt.Println("kekek")
+	fmt.Println(s)
+	fmt.Println(name)
 	DocDB.M.Lock()
-	if _, exist := s.Collections[name]; exist {
-		fmt.Println("Collection with the name " + name + " already exists")
+
+	_, err := os.Stat(consts.DEFAULT_SAVE + s.Name + "/" + name + "__/")
+	if err == nil {
+		fmt.Println("Collection named: " + name + " already exist")
 		DocDB.M.Unlock()
 		return false
 	}
@@ -248,21 +133,16 @@ func (s *Service) CreateNewCollection(name string, owner string) bool {
 	collection.ServiceName = s.Name
 	collection.Name = name
 	collection.Owner = owner
+	collection.LastUpdated = "temp"
 
-	s.Collections[name] = &collection
+	collection.SaveCollection(consts.DEFAULT_SAVE + s.Name + "/")
 	fmt.Println("Created collection: " + name)
-	//DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
 }
 
 func (s *Service) DeleteCollection(name string) bool {
 	DocDB.M.Lock()
-	if _, exist := s.Collections[name]; !exist {
-		fmt.Println("Collection with the name " + name + " don't exist")
-		DocDB.M.Unlock()
-		return false
-	}
 
 	err := os.RemoveAll("./Save/" + s.Name + "/" + name + "/")
 	if err != nil {
@@ -284,14 +164,32 @@ func (s *Service) DeleteCollection(name string) bool {
 
 func (s *Service) GetCollection(name string) *Collection {
 	DocDB.M.Lock()
-	if _, exist := s.Collections[name]; !exist {
-		fmt.Println(`Service: "` + s.Name + `" failed GET: ` + name + " - Does not exist")
+	file, err := os.ReadFile(consts.DEFAULT_SAVE + s.Name + "/" + name + "__")
+	if err != nil {
+		fmt.Println(err.Error())
 		DocDB.M.Unlock()
 		return nil
 	}
 
+	data := make(map[string]interface{})
+
+	collection := Collection{}
+
+	err = json.Unmarshal(file, &data)
+	if err != nil {
+		fmt.Println(err.Error())
+		DocDB.M.Unlock()
+		return nil
+	}
+
+	collection.ServiceName = data["servicename"].(string)
+	collection.Name = data["name"].(string)
+	collection.Owner = data["owner"].(string)
+	collection.LastUpdated = data["lastUpdated"].(string)
+	collection.Documents = make(map[string]*Document)
+
 	DocDB.M.Unlock()
-	return s.Collections[name]
+	return &collection
 }
 
 func (s *Service) SaveService(path string) {
@@ -308,7 +206,7 @@ func (s *Service) SaveService(path string) {
 		return
 	}
 
-	savePath := path + "/" + s.Name
+	savePath := path + s.Name
 
 	file, err := os.Create(savePath + "__")
 	if err != nil {
@@ -335,37 +233,51 @@ func (s *Service) SaveService(path string) {
 func (c *Collection) CreateNewDocument(name string, owner string, content interface{}) bool {
 
 	DocDB.M.Lock()
-	if _, exist := c.Documents[name]; exist {
-		fmt.Println("document with the name " + name + " already exists")
+	_, err := os.Stat(consts.DEFAULT_SAVE + c.ServiceName + "/" + c.Name + "/" + name)
+	if err == nil {
+		fmt.Println("Document already exists")
 		DocDB.M.Unlock()
 		return false
 	}
 
 	var document Document
-
 	document.Name = name
 	document.Owner = owner
 	document.UpdatedBy = owner
 	document.Content = content
 
-	c.Documents[name] = &document
+	document.SaveDocument(consts.DEFAULT_SAVE + c.ServiceName + "/" + c.Name)
 	fmt.Println("Created document: " + name)
-	//DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
+}
+
+func (c *Collection) GetDocument(name string) *Document {
+	DocDB.M.Lock()
+	file, err := os.ReadFile(consts.DEFAULT_SAVE + c.ServiceName + "/" + c.Name + "/" + name)
+	if err != nil {
+		fmt.Println(err.Error())
+		DocDB.M.Unlock()
+		return nil
+	}
+
+	document := Document{}
+
+	err = json.Unmarshal(file, &document)
+	if err != nil {
+		fmt.Println(err.Error())
+		DocDB.M.Unlock()
+		return nil
+	}
+
+	DocDB.M.Unlock()
+	return &document
 }
 
 func (c *Collection) DeleteDocument(name string) bool {
 
 	DocDB.M.Lock()
-	if _, exist := c.Documents[name]; !exist {
-		fmt.Println("document with the name " + name + " don't exist")
-		DocDB.M.Unlock()
-		return false
-	}
-
-	delete(c.Documents, name)
-	err := os.Remove("./Save/" + c.ServiceName + "/" + c.Name + "/" + name)
+	err := os.Remove(consts.DEFAULT_SAVE + c.ServiceName + "/" + c.Name + "/" + name)
 	if err != nil {
 		fmt.Println(err.Error())
 		DocDB.M.Unlock()
@@ -373,21 +285,8 @@ func (c *Collection) DeleteDocument(name string) bool {
 	}
 	fmt.Println("Deleted document " + name + " from " + c.Name)
 
-	//DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
-}
-
-func (c *Collection) GetDocument(name string) *Document {
-	DocDB.M.Lock()
-	if _, exist := c.Documents[name]; !exist {
-		fmt.Println("document with the name " + name + " don't exist")
-		DocDB.M.Unlock()
-		return nil
-	}
-
-	DocDB.M.Unlock()
-	return c.Documents[name]
 }
 
 func (c *Collection) SaveCollection(path string) {
@@ -397,7 +296,9 @@ func (c *Collection) SaveCollection(path string) {
 	col["name"] = c.Name
 	col["owner"] = c.Owner
 	col["lastUpdated"] = c.LastUpdated
-	col["documents"] = []Document{}
+	col["servicename"] = c.ServiceName
+	col["auth"] = c.AuthKey
+	col["documents"] = &[]Document{}
 
 	data, err := json.Marshal(col)
 	if err != nil {
@@ -437,7 +338,6 @@ func (d *Document) SetContent(name string, content interface{}) bool {
 	DocDB.M.Lock()
 	d.UpdatedBy = name
 	d.Content = content
-	//DocDB.SaveDocDB()
 	DocDB.M.Unlock()
 	return true
 
@@ -445,7 +345,16 @@ func (d *Document) SetContent(name string, content interface{}) bool {
 
 func (d *Document) SaveDocument(path string) {
 
-	data, err := json.Marshal(d)
+	temp := make(map[string]interface{})
+
+	temp["updatedBy"] = d.UpdatedBy
+	temp["name"] = d.Name
+	temp["owner"] = d.Owner
+	temp["creationDate"] = d.CreationDate
+	temp["lastUpdated"] = d.LastUpdated
+	temp["content"] = d.Content
+
+	data, err := json.Marshal(temp)
 	if err != nil {
 		fmt.Println(err.Error())
 		return

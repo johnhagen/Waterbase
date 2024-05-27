@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"waterbase/Auth"
+	"waterbase/Debug"
 	"waterbase/DocumentDB"
 )
 
@@ -41,6 +42,10 @@ func RegisterPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterService(w http.ResponseWriter, r *http.Request) {
+
+	if Debug.DebugMode {
+		fmt.Println("Registering new service")
+	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -119,7 +124,7 @@ func RegisterCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var data map[string]interface{}
+	data := make(map[string]interface{})
 
 	err = json.Unmarshal(body, &data)
 	if err != nil {
@@ -158,12 +163,15 @@ func RegisterCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//success := DocumentDB.DocDB.GetService(servicename).CreateNewCollection(name, owner)
 	success := DocumentDB.DocDB.GetService(servicename).CreateNewCollection(name, owner)
 	if !success {
 		fmt.Println("Could not create collection")
+		http.Error(w, "", http.StatusAlreadyReported)
 		return
 	}
-	DocumentDB.DocDB.GetService(servicename).GetCollection(name).SaveCollection("./Save/" + servicename)
+
+	//DocumentDB.DocDB.GetServiceA(servicename).GetCollectionA(name).SaveCollection("./Save/" + servicename)
 
 	http.Error(w, "", http.StatusAccepted)
 }
@@ -176,7 +184,7 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var data map[string]interface{}
+	data := make(map[string]interface{})
 
 	err = json.Unmarshal(body, &data)
 	if err != nil {
@@ -229,7 +237,7 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	DocumentDB.DocDB.GetService(servicename).GetCollection(collectionname).GetDocument(name).SaveDocument("./Save/" + servicename + "/" + collectionname)
+	//DocumentDB.DocDB.GetService(servicename).GetCollection(collectionname).GetDocument(name).SaveDocument("./Save/" + servicename + "/" + collectionname)
 
 	http.Error(w, "", http.StatusAccepted)
 }
