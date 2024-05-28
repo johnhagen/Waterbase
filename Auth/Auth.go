@@ -37,7 +37,7 @@ func (k *KeyBase) CreateAuthenticationKey(name string, keylength int, seed int) 
 	key := ""
 
 	for i := 1; i < keylength; i++ {
-		key += string(char[rand.Intn(seed)%16])
+		key += string(char[rand.Intn(seed)%len(char)])
 	}
 
 	k.Keys[name] = key

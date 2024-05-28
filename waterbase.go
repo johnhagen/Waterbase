@@ -23,7 +23,6 @@ func main() {
 
 	Auth.KeyDB.Init("Keks", 100)
 	DocumentDB.DocDB.InitDB()
-	//DocumentDB.DocDB.NewLoadDB()
 	Auth.KeyDB.ReadDB()
 
 	// Configure handler endpoints
@@ -35,7 +34,5 @@ func main() {
 	// Start HTTP Server
 	log.Println("Starting server on port " + port + "...")
 	log.Fatal(http.ListenAndServe(":"+port, nil))
-
-	// Post shutdown
 
 }
