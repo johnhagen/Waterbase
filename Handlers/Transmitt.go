@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"waterbase/Auth"
 	consts "waterbase/Data"
 	"waterbase/DocumentDB"
@@ -63,8 +64,16 @@ func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
 
 	var colNames []string
 
-	for g := range service.Collections {
-		colNames = append(colNames, g)
+	files, err := os.ReadDir(consts.DEFAULT_SAVE + service.Name + "/")
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	for _, h := range files {
+		if !strings.Contains(h.Name(), "__") {
+			colNames = append(colNames, h.Name())
+		}
 	}
 
 	jsonData, err := json.Marshal(colNames)

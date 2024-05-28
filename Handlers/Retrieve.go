@@ -20,31 +20,20 @@ func RetrieveHandler(w http.ResponseWriter, r *http.Request) {
 
 func RetrieveGetHandler(w http.ResponseWriter, r *http.Request) {
 
-	query := r.URL.Query()
-	service := query.Get("service")
-	collection := query.Get("collection")
-	document := query.Get("document")
-
-	if service != "" && collection != "" && document != "" {
-		GetDocument(w, r)
-	} else if service != "" && collection != "" && document == "" {
-		GetCollection(w, r)
-	} else if service != "" && collection == "" && document == "" {
+	switch r.URL.Query().Get("type") {
+	case "service":
 		GetService(w, r)
+	case "collection":
+		GetCollection(w, r)
+	case "document":
+		GetDocument(w, r)
+	default:
+		http.Error(w, "", http.StatusBadRequest)
 	}
 }
 
 func GetService(w http.ResponseWriter, r *http.Request) {
 
-	service := r.URL.Query().Get("service")
-
-	Sfind := DocumentDB.DocDB.GetService(service)
-	if Sfind == nil {
-		http.Error(w, "ERROR: Could not find the service", http.StatusBadRequest)
-		return
-	}
-
-	//body, err := io.ReadAll(r.Body)
 	data, err := Utils.ReadFromJSON(r)
 	if err != nil {
 		http.Error(w, "", http.StatusBadRequest)
@@ -52,19 +41,18 @@ func GetService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//data := make(map[string]interface{})
-
-	//err = json.Unmarshal(body, &data)
-	//if err != nil {
-	//	http.Error(w, "", http.StatusBadRequest)
-	//	fmt.Println("Utils " + err.Error())
-	//	return
-	//}
-
 	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
 	if !Authenticated {
 		fmt.Println("User is not authenticated")
 		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
+	service := data["servicename"].(string)
+
+	Sfind := DocumentDB.DocDB.GetService(service)
+	if Sfind == nil {
+		http.Error(w, "ERROR: Could not find the service", http.StatusBadRequest)
 		return
 	}
 
@@ -82,16 +70,11 @@ func GetService(w http.ResponseWriter, r *http.Request) {
 
 func GetCollection(w http.ResponseWriter, r *http.Request) {
 
-	service := r.URL.Query().Get("service")
-	collection := r.URL.Query().Get("collection")
-
 	data, err := Utils.ReadFromJSON(r)
 	if err != nil {
 		fmt.Println("Utils" + err.Error())
 		return
 	}
-
-	data["servicename"] = service
 
 	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
 	if !Authenticated {
@@ -99,6 +82,15 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusUnauthorized)
 		return
 	}
+
+	if !Utils.IsString(data["collectionname"]) {
+		fmt.Println("Missing collection name")
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	service := data["servicename"].(string)
+	collection := data["collectionname"].(string)
 
 	yes := DocumentDB.DocDB.GetService(service).GetCollection(collection)
 	if yes == nil {
@@ -119,25 +111,36 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetDocument(w http.ResponseWriter, r *http.Request) {
-	service := r.URL.Query().Get("service")
-	collection := r.URL.Query().Get("collection")
-	document := r.URL.Query().Get("document")
 
-	body, err := Utils.ReadFromJSON(r)
+	data, err := Utils.ReadFromJSON(r)
 	if err != nil {
 		fmt.Println("Utils" + err.Error())
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
-	body["servicename"] = service
-
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
 	if !Authenticated {
 		fmt.Println("User is not authenticated")
 		http.Error(w, "", http.StatusUnauthorized)
 		return
 	}
+
+	if !Utils.IsString(data["collectionname"]) {
+		fmt.Println("Missing collection name")
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	if !Utils.IsString(data["documentname"]) {
+		fmt.Println("Missing document name")
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	service := data["servicename"].(string)
+	collection := data["collectionname"].(string)
+	document := data["documentname"].(string)
 
 	yes := DocumentDB.DocDB.GetService(service).GetCollection(collection).GetDocument(document)
 	if yes == nil {
@@ -145,7 +148,7 @@ func GetDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(*yes)
+	res, err := json.Marshal(&yes)
 	if err != nil {
 		fmt.Println("fuck off doc")
 		http.Error(w, "", http.StatusBadRequest)
@@ -153,5 +156,5 @@ func GetDocument(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("content-type", "application/json")
-	w.Write(data)
+	w.Write(res)
 }

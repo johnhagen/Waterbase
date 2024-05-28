@@ -70,23 +70,7 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
-	/*
-		wd, _ := os.Getwd()
 
-				path := filepath.Join(wd+"/Save/", body["servicename"].(string))
-
-				fmt.Println(path)
-
-				err = os.Remove(path + "__")
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-
-				err = os.RemoveAll(path)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-	*/
 	http.Error(w, "", http.StatusAccepted)
 }
 
