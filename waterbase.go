@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"waterbase/Auth"
+	CacheMem "waterbase/Cache"
 	"waterbase/DocumentDB"
 	handlers "waterbase/Handlers"
 )
@@ -21,6 +22,7 @@ func main() {
 		port = "8080"
 	}
 
+	CacheMem.Cache.Init(15, 1000)
 	Auth.KeyDB.Init("Keks", 100)
 	DocumentDB.DocDB.InitDB()
 	Auth.KeyDB.ReadDB()
@@ -30,6 +32,9 @@ func main() {
 	http.HandleFunc("/waterbase/register", handlers.RegisterHandler)
 	http.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
 	http.HandleFunc("/waterbase/remove", handlers.RemoveHandler)
+
+	// Start cache purge worker
+	go CacheMem.Cache.PurgeCacheWorker(5)
 
 	// Start HTTP Server
 	log.Println("Starting server on port " + port + "...")

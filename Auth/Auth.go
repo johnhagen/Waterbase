@@ -67,13 +67,13 @@ func (k *KeyBase) CheckAuthenticationKey(s map[string]interface{}) bool {
 	}
 
 	if s["auth"].(string) == k.Keys[s["servicename"].(string)] {
-		fmt.Println("Key: " + k.Keys[s["servicename"].(string)] + " for service: " + s["servicename"].(string) + " is authenticated")
+		//fmt.Println("Key: " + k.Keys[s["servicename"].(string)] + " for service: " + s["servicename"].(string) + " is authenticated")
 		k.m.Unlock()
 		return true
 	}
 
 	k.m.Unlock()
-	fmt.Println("Key did not match")
+	fmt.Println("Key invalid. Key: " + s["auth"].(string) + " Service: " + s["servicename"].(string))
 	return false
 }
 
@@ -87,7 +87,7 @@ func (k *KeyBase) CheckAdminKey(s map[string]interface{}) bool {
 	}
 
 	if k.AdminKey == s["adminkey"].(string) {
-		fmt.Println("Admin key match")
+		//fmt.Println("Admin key match")
 		k.m.Unlock()
 		return true
 	}
