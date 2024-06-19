@@ -60,6 +60,7 @@ func (c *CacheDB) Get(name string) *[]byte {
 	diff := tNow.Sub(c.cacheData[name].creationTime)
 	if int(diff.Seconds()) > c.maxCacheLifeTime {
 		c.m.Unlock()
+		fmt.Println("Cached data is to old: " + name)
 		return nil
 	}
 

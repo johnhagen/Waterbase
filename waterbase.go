@@ -8,6 +8,8 @@ import (
 	CacheMem "waterbase/Cache"
 	"waterbase/DocumentDB"
 	handlers "waterbase/Handlers"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -27,17 +29,36 @@ func main() {
 	DocumentDB.DocDB.InitDB()
 	Auth.KeyDB.ReadDB()
 
+	router := SetupRouter()
 	// Configure handler endpoints
-	http.HandleFunc("/waterbase/transmitt", handlers.TransmittHandler)
-	http.HandleFunc("/waterbase/register", handlers.RegisterHandler)
-	http.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
-	http.HandleFunc("/waterbase/remove", handlers.RemoveHandler)
+	//http.HandleFunc("/waterbase/transmitt", handlers.TransmittHandler)
+	//http.HandleFunc("/waterbase/register", handlers.RegisterHandler)
+	//http.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
+	//http.HandleFunc("/waterbase/remove", handlers.RemoveHandler)
+	//http.HandleFunc("/waterbase/admin", handlers.AdminHandler)
 
 	// Start cache purge worker
-	go CacheMem.Cache.PurgeCacheWorker(5)
+	go CacheMem.Cache.PurgeCacheWorker(20)
 
 	// Start HTTP Server
 	log.Println("Starting server on port " + port + "...")
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 
+}
+
+func SetupRouter() *mux.Router {
+	r := mux.NewRouter()
+
+	r.HandleFunc("/waterbase/transmitt", handlers.TransmittHandler)
+	r.HandleFunc("/waterbase/register", handlers.RegisterHandler)
+	r.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
+	r.HandleFunc("/waterbase/remove", handlers.RemoveHandler)
+	//r.HandleFunc("/waterbase/admin", handlers.AdminHandler)
+
+	staticFileDir := http.Dir("./dashboard/")
+
+	staticFileHandler := http.StripPrefix("/dashboard/", http.FileServer(staticFileDir))
+
+	r.PathPrefix("/dashboard/").Handler(staticFileHandler).Methods("GET")
+	return r
 }
