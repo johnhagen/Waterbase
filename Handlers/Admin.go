@@ -17,10 +17,6 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AdminGetHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	page, err := os.ReadFile("./Pages/index.html")
 	if err != nil {
@@ -29,6 +25,13 @@ func AdminGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("content-type", "text/html")
+	fmt.Println("yes")
+	fmt.Println(w.Header())
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("content-type", "text/html")
 	w.Write(page)
 }

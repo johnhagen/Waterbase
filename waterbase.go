@@ -30,12 +30,6 @@ func main() {
 	Auth.KeyDB.ReadDB()
 
 	router := SetupRouter()
-	// Configure handler endpoints
-	//http.HandleFunc("/waterbase/transmitt", handlers.TransmittHandler)
-	//http.HandleFunc("/waterbase/register", handlers.RegisterHandler)
-	//http.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
-	//http.HandleFunc("/waterbase/remove", handlers.RemoveHandler)
-	//http.HandleFunc("/waterbase/admin", handlers.AdminHandler)
 
 	// Start cache purge worker
 	go CacheMem.Cache.PurgeCacheWorker(20)
@@ -46,7 +40,7 @@ func main() {
 
 }
 
-func SetupRouter() *mux.Router {
+func SetupRouter() http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/waterbase/transmitt", handlers.TransmittHandler)
@@ -60,5 +54,24 @@ func SetupRouter() *mux.Router {
 	staticFileHandler := http.StripPrefix("/dashboard/", http.FileServer(staticFileDir))
 
 	r.PathPrefix("/dashboard/").Handler(staticFileHandler).Methods("GET")
-	return r
+
+	wrappedRouter := corsMiddleware(r)
+
+	return wrappedRouter
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight requests
+		if r.Method == http.MethodOptions {
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
