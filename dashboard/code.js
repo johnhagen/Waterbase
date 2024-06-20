@@ -50,7 +50,7 @@ function EmptyContents() {
 function DeleteService(Name) {
 
     document.getElementById("statusDiv").innerText = "";
-    const url = "http://localhost:8080/waterbase/remove?type=service";
+    const url = "https://waterbase.hagen.fun/waterbase/remove?type=service";
 
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
@@ -98,7 +98,7 @@ function DeleteService(Name) {
 function DeleteCollection(Name, ServiceName) {
 
     document.getElementById("statusDiv").innerText = "";
-    const url = "http://localhost:8080/waterbase/remove?type=collection";
+    const url = "https://waterbase.hagen.fun/waterbase/remove?type=collection";
 
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
@@ -148,7 +148,7 @@ function DeleteCollection(Name, ServiceName) {
 
 function DeleteDocument(Name, ServiceName, CollectionName) {
     document.getElementById("statusDiv").innerText = "";
-    const url = "http://localhost:8080/waterbase/remove?type=document";
+    const url = "https://waterbase.hagen.fun/waterbase/remove?type=document";
 
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
@@ -201,7 +201,7 @@ function DeleteDocument(Name, ServiceName, CollectionName) {
 
 function ListDocContent(ServiceName, CollectionName, DocumentName) {
     document.getElementById("statusDiv").innerText = "";
-    const url = "http://localhost:8080/waterbase/retrieve?type=document";
+    const url = "https://waterbase.hagen.fun/waterbase/retrieve?type=document";
 
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
@@ -268,7 +268,7 @@ function UpdateServices() {
     
     const container = document.getElementById('column-services');
 
-    const URL = 'http://localhost:8080/waterbase/transmitt?type=services';
+    const URL = 'https://waterbase.hagen.fun/waterbase/transmitt?type=services';
 
     const rawResponse = fetch(URL, {
         method: 'GET',
@@ -317,7 +317,7 @@ function UpdateCollections(serviceName) {
 
     const container = document.getElementById('column-collections');
 
-    const URL = 'http://localhost:8080/waterbase/transmitt?type=collections';
+    const URL = 'https://waterbase.hagen.fun/waterbase/transmitt?type=collections';
 
     fetch(URL, {
         method: 'GET',
@@ -374,7 +374,7 @@ function UpdateDocuments(serviceName, collectionName) {
 
     const container = document.getElementById('column-documents');
 
-    const URL = 'http://localhost:8080/waterbase/transmitt?type=documents';
+    const URL = 'https://waterbase.hagen.fun/waterbase/transmitt?type=documents';
 
     fetch(URL, {
         method: 'GET',
