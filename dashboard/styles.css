@@ -97,6 +97,7 @@ body {
 .docContents {
     display: flex;
     flex-wrap: wrap;
+    overflow-wrap: anywhere;
     width: 34%;
     padding: 4px;
     margin: -1px;
