@@ -45,6 +45,55 @@ func (k *KeyBase) CreateAuthenticationKey(name string, keylength int, seed int) 
 	return key, true
 }
 
+func (k *KeyBase) CheckForAuth(s map[string]interface{}) bool {
+	k.m.Lock()
+	authKeyPresent := false
+	adminKeyPresent := false
+
+	if _, ok := s["auth"].(string); ok {
+		authKeyPresent = true
+	}
+
+	if _, ok := s["adminkey"].(string); ok {
+		adminKeyPresent = true
+	}
+
+	if !authKeyPresent && !adminKeyPresent {
+		fmt.Println("No adminkey or authkey specified")
+		k.m.Unlock()
+		return false
+	}
+
+	k.m.Unlock()
+	if k.CheckAdminKey(s) {
+		fmt.Println("Admin key authenticated")
+		return true
+	}
+	k.m.Lock()
+
+	if _, ok := s["servicename"].(string); !ok {
+		fmt.Println("Service name type invalid")
+		k.m.Unlock()
+		return false
+	}
+
+	if _, exist := k.Keys[s["servicename"].(string)]; !exist {
+		fmt.Println("Key does not exist")
+		k.m.Unlock()
+		return false
+	}
+
+	if s["auth"].(string) == k.Keys[s["servicename"].(string)] {
+		//fmt.Println("Key: " + k.Keys[s["servicename"].(string)] + " for service: " + s["servicename"].(string) + " is authenticated")
+		k.m.Unlock()
+		return true
+	}
+
+	k.m.Unlock()
+	fmt.Println("Key invalid. Key: " + s["auth"].(string) + " Service: " + s["servicename"].(string))
+	return false
+}
+
 func (k *KeyBase) CheckAuthenticationKey(s map[string]interface{}) bool {
 
 	k.m.Lock()

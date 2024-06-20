@@ -45,19 +45,13 @@ func DeleteService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := body["auth"].(string); !ok {
-		fmt.Println("No auth key spesified")
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
-
 	if _, ok := body["servicename"].(string); !ok {
 		fmt.Println("No service name spesified")
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	Authenticated := Auth.KeyDB.CheckForAuth(body)
 	if !Authenticated {
 		fmt.Println("Failed to authenticate")
 		http.Error(w, "", http.StatusBadRequest)
@@ -83,11 +77,10 @@ func DeleteCollection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	serString := Utils.IsString(body["servicename"])
-	autString := Utils.IsString(body["auth"])
 	colString := Utils.IsString(body["collectionname"])
 
-	if !serString || !autString || !colString {
-		fmt.Println("Missing servicename, auth or collection")
+	if !serString || !colString {
+		fmt.Println("Missing servicename or collection")
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
@@ -95,7 +88,7 @@ func DeleteCollection(w http.ResponseWriter, r *http.Request) {
 	ser := body["servicename"].(string)
 	col := body["collectionname"].(string)
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	Authenticated := Auth.KeyDB.CheckForAuth(body)
 	if !Authenticated {
 		fmt.Println("Failed to authenticate")
 		http.Error(w, "", http.StatusBadRequest)
@@ -123,10 +116,9 @@ func DeleteDocument(w http.ResponseWriter, r *http.Request) {
 	serString := Utils.IsString(body["servicename"])
 	colString := Utils.IsString(body["collectionname"])
 	docString := Utils.IsString(body["documentname"])
-	autString := Utils.IsString(body["auth"])
 
-	if !serString || !autString || !colString || !docString {
-		fmt.Println("Missing servicename, collectionname, documentname or auth")
+	if !serString || !colString || !docString {
+		fmt.Println("Missing servicename, collectionname or documentname")
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
@@ -135,7 +127,7 @@ func DeleteDocument(w http.ResponseWriter, r *http.Request) {
 	col := body["collectionname"].(string)
 	doc := body["documentname"].(string)
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(body)
+	Authenticated := Auth.KeyDB.CheckForAuth(body)
 	if !Authenticated {
 		fmt.Println("Failed to authenticate")
 		http.Error(w, "", http.StatusBadRequest)

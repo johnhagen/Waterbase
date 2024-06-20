@@ -9,7 +9,6 @@ import (
 	"waterbase/Auth"
 	consts "waterbase/Data"
 	"waterbase/DocumentDB"
-	"waterbase/Utils"
 )
 
 func TransmittHandler(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +86,7 @@ func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
 	}
 	*/
 
-	autString := r.Header.Get("Auth")        //Utils.IsString(data["auth"])
+	autString := r.Header.Get("Adminkey")    //Utils.IsString(data["auth"])
 	serString := r.Header.Get("Servicename") //Utils.IsString(data["servicename"])
 
 	if autString == "" || serString == "" {
@@ -97,16 +96,14 @@ func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := make(map[string]interface{})
-	data["auth"] = autString
+	data["adminkey"] = autString
 	data["servicename"] = serString
 
-	/*
-		Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
-		if !Authenticated {
-			http.Error(w, "", http.StatusUnauthorized)
-			return
-		}
-	*/
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
+	if !Authenticated {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
 
 	service := DocumentDB.DocDB.GetService(data["servicename"].(string))
 	if service == nil {
@@ -141,30 +138,36 @@ func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
 
 func TransmittGetDocuments(w http.ResponseWriter, r *http.Request) {
 
-	data, err := Utils.ReadFromJSON(r)
-	if err != nil {
-		fmt.Println(err.Error())
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
+	/*
+		data, err := Utils.ReadFromJSON(r)
+		if err != nil {
+			fmt.Println(err.Error())
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+	*/
 
-	autString := Utils.IsString(data["auth"])
-	serString := Utils.IsString(data["servicename"])
-	colString := Utils.IsString(data["collectionname"])
+	autString := r.Header.Get("Adminkey")    //Utils.IsString(data["auth"])
+	serString := r.Header.Get("Servicename") //Utils.IsString(data["servicename"])
+	colString := r.Header.Get("Collectionname")
 
-	if !autString || !serString || !colString {
+	if autString == "" || serString == "" || colString == "" {
 		fmt.Println("TRANSMITT GET: Invalid data received")
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
-	/*
-		Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
-		if !Authenticated {
-			http.Error(w, "", http.StatusUnauthorized)
-			return
-		}
-	*/
+	data := make(map[string]interface{})
+
+	data["adminkey"] = autString
+	data["servicename"] = serString
+	data["collectionname"] = colString
+
+	Authenticated := Auth.KeyDB.CheckAdminKey(data)
+	if !Authenticated {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
 
 	collection := DocumentDB.DocDB.GetService(data["servicename"].(string)).GetCollection(data["collectionname"].(string))
 	if collection == nil {
