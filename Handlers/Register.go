@@ -61,7 +61,7 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Authenticated := Auth.KeyDB.CheckAdminKey(data)
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
 		http.Error(w, "", http.StatusUnauthorized)
 		return
@@ -151,7 +151,7 @@ func RegisterCollection(w http.ResponseWriter, r *http.Request) {
 	owner := data["owner"].(string)
 	servicename := data["servicename"].(string)
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
 		fmt.Println("The user is not authenticated to make modifications")
 		fmt.Println(data)
@@ -212,7 +212,7 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
 		fmt.Println("The user is not authenticated to make modifications")
 		fmt.Println(data)

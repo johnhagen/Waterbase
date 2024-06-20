@@ -9,6 +9,7 @@ import (
 	"waterbase/Auth"
 	consts "waterbase/Data"
 	"waterbase/DocumentDB"
+	"waterbase/Utils"
 )
 
 func TransmittHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,15 +37,9 @@ func TransmittGetHandler(w http.ResponseWriter, r *http.Request) {
 
 func TransmittGetServices(w http.ResponseWriter, r *http.Request) {
 
-	if r.Header.Get("Adminkey") == "" {
-		http.Error(w, "", http.StatusBadRequest)
-		fmt.Println("Services: No admin key filled in")
-		return
-	}
-	data := make(map[string]interface{})
-	data["adminkey"] = r.Header.Get("Adminkey")
+	data := Utils.ReadHeader(r)
 
-	Authenticated := Auth.KeyDB.CheckAdminKey(data)
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
 		http.Error(w, "", http.StatusUnauthorized)
 		return
@@ -78,26 +73,8 @@ func TransmittGetServices(w http.ResponseWriter, r *http.Request) {
 }
 
 func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
-	/*data, err := Utils.ReadFromJSON(r)
-	if err != nil {
-		fmt.Println(err.Error())
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
-	*/
 
-	autString := r.Header.Get("Adminkey")    //Utils.IsString(data["auth"])
-	serString := r.Header.Get("Servicename") //Utils.IsString(data["servicename"])
-
-	if autString == "" || serString == "" {
-		fmt.Println("TRANSMITT GET: Invalid data received")
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
-
-	data := make(map[string]interface{})
-	data["adminkey"] = autString
-	data["servicename"] = serString
+	data := Utils.ReadHeader(r)
 
 	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
@@ -138,32 +115,9 @@ func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
 
 func TransmittGetDocuments(w http.ResponseWriter, r *http.Request) {
 
-	/*
-		data, err := Utils.ReadFromJSON(r)
-		if err != nil {
-			fmt.Println(err.Error())
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
-	*/
+	data := Utils.ReadHeader(r)
 
-	autString := r.Header.Get("Adminkey")    //Utils.IsString(data["auth"])
-	serString := r.Header.Get("Servicename") //Utils.IsString(data["servicename"])
-	colString := r.Header.Get("Collectionname")
-
-	if autString == "" || serString == "" || colString == "" {
-		fmt.Println("TRANSMITT GET: Invalid data received")
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
-
-	data := make(map[string]interface{})
-
-	data["adminkey"] = autString
-	data["servicename"] = serString
-	data["collectionname"] = colString
-
-	Authenticated := Auth.KeyDB.CheckAdminKey(data)
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
 		http.Error(w, "", http.StatusUnauthorized)
 		return

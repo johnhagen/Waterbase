@@ -13,7 +13,7 @@ import (
 func (s *Service) CreateNewCollection(name string, owner string) bool {
 	DocDB.M.Lock()
 
-	_, err := os.Stat(consts.DEFAULT_SAVE + s.Name + "/" + name + "__/")
+	_, err := os.Stat(consts.DEFAULT_SAVE + s.Name + "/" + name)
 	if err == nil {
 		fmt.Println("Collection named: " + name + " already exist")
 		DocDB.M.Unlock()

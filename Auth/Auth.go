@@ -66,7 +66,7 @@ func (k *KeyBase) CheckForAuth(s map[string]interface{}) bool {
 
 	k.m.Unlock()
 	if k.CheckAdminKey(s) {
-		fmt.Println("Admin key authenticated")
+		//fmt.Println("Admin key authenticated")
 		return true
 	}
 	k.m.Lock()

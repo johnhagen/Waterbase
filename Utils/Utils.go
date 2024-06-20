@@ -8,6 +8,21 @@ import (
 	"path/filepath"
 )
 
+func ReadHeader(r *http.Request) map[string]interface{} {
+
+	//fmt.Println(r.Header)
+
+	data := make(map[string]interface{})
+
+	data["adminkey"] = r.Header.Get("Adminkey")
+	data["auth"] = r.Header.Get("Auth")
+	data["servicename"] = r.Header.Get("Servicename")
+	data["collectionname"] = r.Header.Get("Collectionname")
+	data["documentname"] = r.Header.Get("Documentname")
+
+	return data
+}
+
 func ReadFromJSON(r *http.Request) (map[string]interface{}, error) {
 
 	data := make(map[string]interface{})

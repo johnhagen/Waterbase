@@ -25,7 +25,7 @@ func main() {
 	}
 
 	CacheMem.Cache.Init(15, 1000)
-	Auth.KeyDB.Init("Keks", 100)
+	Auth.KeyDB.Init("Keks", 200)
 	DocumentDB.DocDB.InitDB()
 	Auth.KeyDB.ReadDB()
 

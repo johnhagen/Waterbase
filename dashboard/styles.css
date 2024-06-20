@@ -5,11 +5,32 @@ body {
     background-color: #5553538f;
 }
 
+.page-header {
+    display: flex;
+    width: auto;
+    position: sticky;
+    max-height: 40px;
+}
+
+.page-header > input {
+    width: 20%;
+    height: 30px;
+    margin: 4px;
+}
+
+.page-header > .LogoName > p {
+    margin: 4px;
+    text-align: center;
+    vertical-align: middle;
+    justify-content: center;
+    font-size: 1.6em;
+}
+
 .container {
     display: flex;
     flex-wrap: wrap;
-    padding: 10px;
-    width: 100%;
+    margin: 10px;
+    width: auto;
 }
 
 .container-head {
@@ -54,13 +75,15 @@ body {
 }
 
 .card:hover {
-    transform: scale(1.02);
+    transform: scale(1.01);
+    background-color: darkgrey;
 }
 
 .card > button {
     width: 30%;
     border-radius: 20px;
     padding: 4px;
+    margin: 2px;
     background: darkgray;
 }
 

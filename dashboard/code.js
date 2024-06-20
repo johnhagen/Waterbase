@@ -43,6 +43,10 @@ function RefreshDocuments() {
 
 }
 
+function EmptyContents() {
+    document.getElementsByClassName("docContents")[0].innerText = "";
+}
+
 function DeleteService(Name) {
 
     document.getElementById("statusDiv").innerText = "";
@@ -51,16 +55,18 @@ function DeleteService(Name) {
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
         return;
-    }
+    };
 
     if (Name.id) {
         Name = Name.id;
-    }
+    };
 
     const data = {
         adminkey: document.getElementById("adminKeyInput").value.toString(),
         servicename: Name.toString()
     };
+
+    console.log(data);
 
     //console.log(data);
 
@@ -82,6 +88,7 @@ function DeleteService(Name) {
         console.log("Deleting service: " + Name.toString());
         document.getElementById("column-services").removeChild(document.getElementById(Name.toString()));
         UpdateServices();
+        EmptyContents();
     })
     .catch(error => {
         console.error('GET request is fucked mate', error);
@@ -131,6 +138,8 @@ function DeleteCollection(Name, ServiceName) {
     .then(data => {
         console.log("Deleting collection: " + Name.toString());
         document.getElementById("column-collections").removeChild(document.getElementById(Name.toString()));
+        RefreshDocuments();
+        EmptyContents();
     })
     .catch(error => {
         console.error('GET request is fucked mate', error);
@@ -183,14 +192,58 @@ function DeleteDocument(Name, ServiceName, CollectionName) {
     .then(data => {
         console.log("Deleting document: " + Name.toString());
         document.getElementById("column-documents").removeChild(document.getElementById(Name.toString()));
+        EmptyContents();
     })
     .catch(error => {
         console.error('GET request is fucked mate', error);
     });
 }
 
-function ListDocContent() {
-    
+function ListDocContent(ServiceName, CollectionName, DocumentName) {
+    document.getElementById("statusDiv").innerText = "";
+    const url = "http://localhost:8080/waterbase/retrieve?type=document";
+
+    if (document.getElementById("adminKeyInput").value.length === 0) {
+        document.getElementById("statusDiv").innerText = "No Admin Key Specified";
+        return;
+    }
+
+    if (DocumentName.id) {
+        DocumentName = DocumentName.id;
+    }
+
+    if (ServiceName.id) {
+        ServiceName = ServiceName.id;
+    }
+
+    if (CollectionName.id) {
+        CollectionName = CollectionName.id;
+    }
+
+    //console.log("Document: " + Name + " from service: " + ServiceName)
+    fetch(url, {
+        method: 'GET',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Adminkey': document.getElementById("adminKeyInput").value.toString(),
+        'Servicename': ServiceName.toString(),
+        'Collectionname': CollectionName.toString(),
+        'Documentname': DocumentName.toString()
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('You fucked up fam: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        document.getElementsByClassName("docContents")[0].innerText = JSON.stringify(data.content);
+    })
+    .catch(error => {
+        console.error('GET request is fucked mate', error);
+    });
 }
 
 function CreateButton(Text, Function) {
@@ -211,6 +264,7 @@ function UpdateServices() {
 
 
     RefreshColumns();
+    EmptyContents();
     
     const container = document.getElementById('column-services');
 
@@ -350,10 +404,10 @@ function UpdateDocuments(serviceName, collectionName) {
         cardName.innerText = element.toString();
         newCard.append(cardName);
         newCard.append(CreateButton("Delete Document", `DeleteDocument(${element.toString()}, ${serviceName.toString()}, ${collectionName.toString()})`));
-        newCard.append(CreateButton("List Contents", `ListDocContent(${element.toString()})`));
+        newCard.append(CreateButton("List Contents", `ListDocContent(${service.id.toString()}, ${collection.id.toString()},${element.toString()})`));
         
         container.appendChild(newCard);
-        });
+        });List
         
 
         //container.appendChild(newCard);

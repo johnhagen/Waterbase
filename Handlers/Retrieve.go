@@ -34,14 +34,11 @@ func RetrieveGetHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetService(w http.ResponseWriter, r *http.Request) {
 
-	data, err := Utils.ReadFromJSON(r)
-	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
-		fmt.Println("Utils " + err.Error())
-		return
-	}
+	data := Utils.ReadHeader(r)
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
+	//fmt.Println(data)
+
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
 		fmt.Println("User is not authenticated")
 		http.Error(w, "", http.StatusUnauthorized)
@@ -70,13 +67,9 @@ func GetService(w http.ResponseWriter, r *http.Request) {
 
 func GetCollection(w http.ResponseWriter, r *http.Request) {
 
-	data, err := Utils.ReadFromJSON(r)
-	if err != nil {
-		fmt.Println("Utils" + err.Error())
-		return
-	}
+	data := Utils.ReadHeader(r)
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
 		fmt.Println("User is not authenticated")
 		http.Error(w, "", http.StatusUnauthorized)
@@ -98,7 +91,7 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(yes)
+	//fmt.Println(yes)
 
 	jsonData, err := json.Marshal(&yes)
 	if err != nil {
@@ -112,37 +105,28 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 
 func GetDocument(w http.ResponseWriter, r *http.Request) {
 
-	data, err := Utils.ReadFromJSON(r)
-	if err != nil {
-		fmt.Println("Utils" + err.Error())
+	serString := r.Header.Get("Servicename")
+	colString := r.Header.Get("Collectionname")
+	docString := r.Header.Get("Documentname")
+
+	if serString == "" || colString == "" || docString == "" {
+		fmt.Println("Missing Servicename, collectionname or documentname")
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
-	Authenticated := Auth.KeyDB.CheckAuthenticationKey(data)
+	data := Utils.ReadHeader(r)
+
+	//fmt.Println(data)
+
+	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
 		fmt.Println("User is not authenticated")
 		http.Error(w, "", http.StatusUnauthorized)
 		return
 	}
 
-	if !Utils.IsString(data["collectionname"]) {
-		fmt.Println("Missing collection name")
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
-
-	if !Utils.IsString(data["documentname"]) {
-		fmt.Println("Missing document name")
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
-
-	service := data["servicename"].(string)
-	collection := data["collectionname"].(string)
-	document := data["documentname"].(string)
-
-	yes := DocumentDB.DocDB.GetService(service).GetCollection(collection).GetDocument(document)
+	yes := DocumentDB.DocDB.GetService(data["servicename"].(string)).GetCollection(data["collectionname"].(string)).GetDocument(data["documentname"].(string))
 	if yes == nil {
 		http.Error(w, "ERROR: Could not find the document", http.StatusBadRequest)
 		return
