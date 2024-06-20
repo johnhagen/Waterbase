@@ -37,6 +37,13 @@ func TransmittGetHandler(w http.ResponseWriter, r *http.Request) {
 
 func TransmittGetServices(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Methods", "GET")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		return
+	}
+
 	data := Utils.ReadHeader(r)
 
 	Authenticated := Auth.KeyDB.CheckForAuth(data)
@@ -73,6 +80,13 @@ func TransmittGetServices(w http.ResponseWriter, r *http.Request) {
 }
 
 func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Methods", "GET")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		return
+	}
 
 	data := Utils.ReadHeader(r)
 
@@ -114,6 +128,13 @@ func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
 }
 
 func TransmittGetDocuments(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Methods", "GET")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		return
+	}
 
 	data := Utils.ReadHeader(r)
 
