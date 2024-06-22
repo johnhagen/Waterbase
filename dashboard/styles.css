@@ -2,23 +2,33 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #5553538f;
+    background-color: #051622;
 }
 
 .page-header {
+    vertical-align: center;
     display: flex;
     width: auto;
-    position: sticky;
+    height: 40px;
     max-height: 40px;
+    border: solid 1px #deb992;
+    padding-bottom: 2px;
+    border-style: none none solid none;
 }
 
 .page-header > input {
+    float: right;
     width: 20%;
-    height: 30px;
-    margin: 4px;
+    height: auto;
+    margin: 2px 2px 2px auto;
+}
+
+.page-header > button {
+    margin: 2px;
 }
 
 .page-header > .LogoName > p {
+    color: #deb992;
     margin: 4px;
     text-align: center;
     vertical-align: middle;
@@ -26,9 +36,25 @@ body {
     font-size: 1.6em;
 }
 
+.LogoHighlight {
+    color: #1ba098;
+}
+
+.pageButton {
+    background: #dac6b3;
+    border-color: #deb992;
+}
+
+.pageInputField {
+    background-color: #dac6b3;
+    border-color: #deb992;
+}
+
 .container {
     display: flex;
     flex-wrap: wrap;
+    height: 900px;
+    max-height: 900px;
     margin: 10px;
     width: auto;
 }
@@ -41,6 +67,7 @@ body {
 }
 
 .container-head > h2 {
+    color: #deb992;
     width: 22%;
     text-align: center;
     margin: 0;
@@ -55,19 +82,22 @@ body {
 .column {
     flex: 1;
     max-width: 22%;
+    height: inherit;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
     padding: 4px;
     margin: -1px;
     border: solid;
-    border-width: 2px;
+    border-color: #deb992;
+    border-width: 1px;
 }
 
 .card {
-    display: flex;
-    justify-content: center;
     text-align: center;
-    background-color: grey;
-    border: 1px solid #ddd;
-    height: 40px;
+    background-color: #dac6b3;
+    border: 1px solid #d89e60;
+    height: 50px;
+    max-height: 50px;
     padding: 4px;
     margin-bottom: 2px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -80,27 +110,40 @@ body {
 }
 
 .card > button {
-    width: 30%;
-    border-radius: 20px;
+    height: 30px;
+    width: 48%;
+    border-radius: 0;
     padding: 4px;
     margin: 2px;
-    background: darkgray;
 }
 
 .card > h3 {
-    margin: auto;
+    margin: 0 auto 0 auto;
     text-align: center;
-    height: auto;
-    width: 40%;
+    height: 20px;
+    width: 100%;
 }
 
 .docContents {
-    display: flex;
+    display: flexbox;
     flex-wrap: wrap;
-    overflow-wrap: anywhere;
+    
+    height: inherit;
+    max-height: inherit;
     width: 34%;
     padding: 4px;
     margin: -1px;
     border: solid;
-    border-width: 2px;
+    color: #dac6b3;
+    border-color: #deb992;
+    border-width: 1px;
+}
+
+.docContentsInsides {
+    height: 100%;
+    width: calc((100%) - 8px);
+    margin: 0;
+    padding: 4px;
+    overflow-wrap: anywhere;
+    color: inherit;
 }

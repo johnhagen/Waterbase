@@ -10,10 +10,10 @@
     <header 
     class="page-header">
     <div class="LogoName">
-        <p>Waterbase Dashboard</p>
+        <p>Waterbase <span class="LogoHighlight">Dashboard</span></p>
     </div>
-    <input placeholder="Admin Key" type="password" name="adminKeyInput" id="adminKeyInput">
-    <button onclick=UpdateServices()>Add Cards</button> 
+    <input placeholder="Admin Key" type="password" name="adminKeyInput" id="adminKeyInput" class="pageInputField">
+    <button onclick=UpdateServices() class="pageButton">Add Cards</button> 
     <div id="statusDiv"></div>
     </header>
     <div class="container-head">
@@ -30,6 +30,7 @@
         <div class="column" id="column-documents">
         </div>
         <div class="docContents">
+            <p class="docContentsInsides"></p>
         </div>
     </div>
     <script src="code.js"></script>

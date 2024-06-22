@@ -1,3 +1,6 @@
+let serverURL = "http://localhost:8080"
+//let serverURL = "https://waterbase.hagen.fun"
+
 function RefreshColumns() {
 
     const docContainer = document.getElementById('column-documents');
@@ -44,13 +47,13 @@ function RefreshDocuments() {
 }
 
 function EmptyContents() {
-    document.getElementsByClassName("docContents")[0].innerText = "";
+    document.getElementsByClassName("docContentsInsides")[0].innerText = "";
 }
 
 function DeleteService(Name) {
 
     document.getElementById("statusDiv").innerText = "";
-    const url = "https://waterbase.hagen.fun/waterbase/remove?type=service";
+    const url = serverURL + "/waterbase/remove?type=service";
 
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
@@ -98,7 +101,7 @@ function DeleteService(Name) {
 function DeleteCollection(Name, ServiceName) {
 
     document.getElementById("statusDiv").innerText = "";
-    const url = "https://waterbase.hagen.fun/waterbase/remove?type=collection";
+    const url = serverURL + "/waterbase/remove?type=collection";
 
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
@@ -148,7 +151,7 @@ function DeleteCollection(Name, ServiceName) {
 
 function DeleteDocument(Name, ServiceName, CollectionName) {
     document.getElementById("statusDiv").innerText = "";
-    const url = "https://waterbase.hagen.fun/waterbase/remove?type=document";
+    const url = serverURL + "/waterbase/remove?type=document";
 
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
@@ -201,7 +204,7 @@ function DeleteDocument(Name, ServiceName, CollectionName) {
 
 function ListDocContent(ServiceName, CollectionName, DocumentName) {
     document.getElementById("statusDiv").innerText = "";
-    const url = "https://waterbase.hagen.fun/waterbase/retrieve?type=document";
+    const url = serverURL + "/waterbase/retrieve?type=document";
 
     if (document.getElementById("adminKeyInput").value.length === 0) {
         document.getElementById("statusDiv").innerText = "No Admin Key Specified";
@@ -239,7 +242,7 @@ function ListDocContent(ServiceName, CollectionName, DocumentName) {
         return response.json();
     })
     .then(data => {
-        document.getElementsByClassName("docContents")[0].innerText = JSON.stringify(data.content);
+        document.getElementsByClassName("docContentsInsides")[0].innerText = JSON.stringify(data.content);
     })
     .catch(error => {
         console.error('GET request is fucked mate', error);
@@ -249,6 +252,7 @@ function ListDocContent(ServiceName, CollectionName, DocumentName) {
 function CreateButton(Text, Function) {
     let button = document.createElement('button');
     button.textContent = Text;
+    button.setAttribute("class", "pageButton");
     button.setAttribute("onclick", Function);
     return button;
 }
@@ -268,7 +272,7 @@ function UpdateServices() {
     
     const container = document.getElementById('column-services');
 
-    const URL = 'https://waterbase.hagen.fun/waterbase/transmitt?type=services';
+    const URL = serverURL + "/waterbase/transmitt?type=services";
 
     const rawResponse = fetch(URL, {
         method: 'GET',
@@ -293,8 +297,8 @@ function UpdateServices() {
         cardName.innerText = element;
         newCard.setAttribute("key", "Keks")
         newCard.append(cardName);
-        newCard.append(CreateButton("Delete Service", `DeleteService(${element.toString()})`));
-        newCard.append(CreateButton("Get Collections", `UpdateCollections(${element.toString()})`));
+        newCard.append(CreateButton("Delete", `DeleteService(${element.toString()})`));
+        newCard.append(CreateButton("Collections", `UpdateCollections(${element.toString()})`));
 
         container.appendChild(newCard);
         });
@@ -317,7 +321,7 @@ function UpdateCollections(serviceName) {
 
     const container = document.getElementById('column-collections');
 
-    const URL = 'https://waterbase.hagen.fun/waterbase/transmitt?type=collections';
+    const URL = serverURL + "/waterbase/transmitt?type=collections";
 
     fetch(URL, {
         method: 'GET',
@@ -346,8 +350,8 @@ function UpdateCollections(serviceName) {
         let cardName = document.createElement('h3');
         cardName.innerText = element.toString();
         newCard.append(cardName);
-        newCard.append(CreateButton("Delete Collection", `DeleteCollection(${element.toString()}, ${service.id.toString()})`));
-        newCard.append(CreateButton("Get Documents", `UpdateDocuments(${service.id.toString()},${element.toString()})`));
+        newCard.append(CreateButton("Delete", `DeleteCollection(${element.toString()}, ${service.id.toString()})`));
+        newCard.append(CreateButton("Documents", `UpdateDocuments(${service.id.toString()},${element.toString()})`));
         
         container.appendChild(newCard);
         });
@@ -374,7 +378,7 @@ function UpdateDocuments(serviceName, collectionName) {
 
     const container = document.getElementById('column-documents');
 
-    const URL = 'https://waterbase.hagen.fun/waterbase/transmitt?type=documents';
+    const URL = serverURL + "/waterbase/transmitt?type=documents";
 
     fetch(URL, {
         method: 'GET',
@@ -403,8 +407,8 @@ function UpdateDocuments(serviceName, collectionName) {
         let cardName = document.createElement('h3');
         cardName.innerText = element.toString();
         newCard.append(cardName);
-        newCard.append(CreateButton("Delete Document", `DeleteDocument(${element.toString()}, ${serviceName.toString()}, ${collectionName.toString()})`));
-        newCard.append(CreateButton("List Contents", `ListDocContent(${service.id.toString()}, ${collection.id.toString()},${element.toString()})`));
+        newCard.append(CreateButton("Delete", `DeleteDocument(${element.toString()}, ${serviceName.toString()}, ${collectionName.toString()})`));
+        newCard.append(CreateButton("Contents", `ListDocContent(${service.id.toString()}, ${collection.id.toString()},${element.toString()})`));
         
         container.appendChild(newCard);
         });List
