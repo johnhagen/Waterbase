@@ -127,7 +127,6 @@ body {
 .docContents {
     display: flexbox;
     flex-wrap: wrap;
-    
     height: inherit;
     max-height: inherit;
     width: 34%;
@@ -140,7 +139,9 @@ body {
 }
 
 .docContentsInsides {
-    height: 100%;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    height: 99%;
     width: calc((100%) - 8px);
     margin: 0;
     padding: 4px;

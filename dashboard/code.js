@@ -1,8 +1,13 @@
 let serverURL = "http://localhost:8080"
 //let serverURL = "https://waterbase.hagen.fun"
 
+function EmptyContents() {
+    document.getElementsByClassName("docContentsInsides")[0].innerText = "";
+}
+
 function RefreshColumns() {
 
+    EmptyContents()
     const docContainer = document.getElementById('column-documents');
     const colContainer = document.getElementById('column-collections');
     const container = document.getElementById('column-services');
@@ -24,6 +29,7 @@ function RefreshColumns() {
 
 function RefreshCollections() {
 
+    EmptyContents()
     const docContainer = document.getElementById('column-documents');
     const colContainer = document.getElementById('column-collections');
     
@@ -38,6 +44,8 @@ function RefreshCollections() {
 }
 
 function RefreshDocuments() {
+
+    EmptyContents()
     const docContainer = document.getElementById('column-documents');
 
     while (docContainer.firstChild) {
@@ -46,9 +54,7 @@ function RefreshDocuments() {
 
 }
 
-function EmptyContents() {
-    document.getElementsByClassName("docContentsInsides")[0].innerText = "";
-}
+
 
 function DeleteService(Name) {
 
@@ -297,8 +303,8 @@ function UpdateServices() {
         cardName.innerText = element;
         newCard.setAttribute("key", "Keks")
         newCard.append(cardName);
-        newCard.append(CreateButton("Delete", `DeleteService(${element.toString()})`));
-        newCard.append(CreateButton("Collections", `UpdateCollections(${element.toString()})`));
+        newCard.append(CreateButton("Delete", 'DeleteService("' + `${element.toString()}` + '")'));
+        newCard.append(CreateButton("Collections", 'UpdateCollections("' + `${element.toString()}` + '")'));
 
         container.appendChild(newCard);
         });
@@ -318,6 +324,8 @@ function UpdateCollections(serviceName) {
     }
 
     RefreshCollections();
+
+
 
     const container = document.getElementById('column-collections');
 
@@ -350,8 +358,8 @@ function UpdateCollections(serviceName) {
         let cardName = document.createElement('h3');
         cardName.innerText = element.toString();
         newCard.append(cardName);
-        newCard.append(CreateButton("Delete", `DeleteCollection(${element.toString()}, ${service.id.toString()})`));
-        newCard.append(CreateButton("Documents", `UpdateDocuments(${service.id.toString()},${element.toString()})`));
+        newCard.append(CreateButton("Delete", 'DeleteCollection("' + `${element.toString()}` + '", "' +  `${service.id.toString()}` + '")'));
+        newCard.append(CreateButton("Documents", 'UpdateDocuments("' + `${service.id.toString()}` + '", "' + `${element.toString()}` + '")'));
         
         container.appendChild(newCard);
         });
@@ -407,8 +415,8 @@ function UpdateDocuments(serviceName, collectionName) {
         let cardName = document.createElement('h3');
         cardName.innerText = element.toString();
         newCard.append(cardName);
-        newCard.append(CreateButton("Delete", `DeleteDocument(${element.toString()}, ${serviceName.toString()}, ${collectionName.toString()})`));
-        newCard.append(CreateButton("Contents", `ListDocContent(${service.id.toString()}, ${collection.id.toString()},${element.toString()})`));
+        newCard.append(CreateButton("Delete", 'DeleteDocument("' + `${element.toString()}` + '", "' +  `${serviceName.toString()}` + '", "' + `${collectionName.toString()}` + '")'));
+        newCard.append(CreateButton("Contents", 'ListDocContent("' + `${service.id.toString()}` + '", "' + `${collection.id.toString()}` + '", "' + `${element.toString()}` + '")'));
         
         container.appendChild(newCard);
         });List
