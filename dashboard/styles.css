@@ -148,3 +148,57 @@ body {
     overflow-wrap: anywhere;
     color: inherit;
 }
+
+@media screen and (max-width: 400px) {
+    .container {
+        display: flex;
+        gap: 0;
+    }
+
+    .card {
+
+    }
+
+    .card > button {
+        width: 38%;
+        overflow: hidden;
+    }
+
+    .column {
+        width: 32.666666667%;
+        max-width: 32.666666667%;
+        height: 20%;
+        overflow-x: hidden;
+    }
+
+    .LogoName {
+        width: 25%;
+        font-size: x-small;
+        justify-content: center;
+        vertical-align: middle;
+    }
+
+    .Logo {
+        height: 100%;
+    }
+
+    .documentContent {
+        display: none;
+    }
+
+    .container-head > h2 {
+        color: #deb992;
+        width: 32.666666667%;
+        font-size: small;
+        text-align: center;
+        margin: 0;
+    }
+
+    .docContents {
+        width: 98%;
+        max-width: 98%;
+        max-height: 65%;
+        bottom: 60px;
+        position: relative;
+    }
+}
