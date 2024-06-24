@@ -130,7 +130,7 @@ func (k *KeyBase) CheckAdminKey(s map[string]interface{}) bool {
 
 	k.m.Lock()
 	if _, ok := s["adminkey"].(string); !ok {
-		fmt.Println("Admin key type invalid")
+		//fmt.Println("Admin key type invalid")
 		k.m.Unlock()
 		return false
 	}
