@@ -149,14 +149,10 @@ body {
     color: inherit;
 }
 
-@media screen and (max-width: 400px) {
+@media screen and (max-width: 420px) {
     .container {
         display: flex;
         gap: 0;
-    }
-
-    .card {
-
     }
 
     .card > button {
@@ -197,7 +193,7 @@ body {
     .docContents {
         width: 98%;
         max-width: 98%;
-        max-height: 65%;
+        max-height: 60%;
         bottom: 60px;
         position: relative;
     }
