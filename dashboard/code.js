@@ -419,9 +419,7 @@ function UpdateDocuments(serviceName, collectionName) {
         newCard.append(CreateButton("Contents", 'ListDocContent("' + `${service.id.toString()}` + '", "' + `${collection.id.toString()}` + '", "' + `${element.toString()}` + '")'));
         
         container.appendChild(newCard);
-        });List
-        
-
+        });
         //container.appendChild(newCard);
     })
     .catch(error => {
