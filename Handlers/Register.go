@@ -67,7 +67,7 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := data["name"].(string); !ok {
+	if _, ok := data["servicename"].(string); !ok {
 		fmt.Println("Name not spesified in json")
 		return
 	}
@@ -79,7 +79,7 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 
 	var service DocumentDB.Service
 
-	service.Name = data["name"].(string)
+	service.Name = data["servicename"].(string)
 	service.Owner = data["owner"].(string)
 
 	if service.Name == "" || service.Owner == "" {
@@ -126,13 +126,15 @@ func RegisterCollection(w http.ResponseWriter, r *http.Request) {
 
 	data := make(map[string]interface{})
 
+	fmt.Println(data)
+
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	if _, ok := data["name"].(string); !ok {
+	if _, ok := data["collectionname"].(string); !ok {
 		fmt.Println("Name not spesified in json")
 		return
 	}
@@ -147,7 +149,7 @@ func RegisterCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := data["name"].(string)
+	name := data["collectionname"].(string)
 	owner := data["owner"].(string)
 	servicename := data["servicename"].(string)
 
@@ -192,7 +194,7 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := data["name"].(string); !ok {
+	if _, ok := data["documentname"].(string); !ok {
 		fmt.Println("Name not spesified in json")
 		return
 	}
@@ -219,7 +221,7 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := data["name"].(string)
+	name := data["documentname"].(string)
 	owner := data["owner"].(string)
 	servicename := data["servicename"].(string)
 	collectionname := data["collectionname"].(string)
