@@ -19,10 +19,12 @@ type KeyBase struct {
 }
 
 func (k *KeyBase) Init(adminKey string, keyLength int) {
+	k.m.Lock()
 	// Map service name to key
 	k.Keys = make(map[string]string)
 	k.AdminKey = adminKey
 	k.KeyLength = keyLength
+	k.m.Unlock()
 }
 
 func (k *KeyBase) CreateAuthenticationKey(name string, keylength int, seed int) (string, bool) {
@@ -137,43 +139,53 @@ func (k *KeyBase) CheckAdminKey(s map[string]interface{}) bool {
 }
 
 func (k *KeyBase) DeleteKey(name string) bool {
+	k.m.Lock()
 
 	if _, exist := k.Keys[name]; !exist {
-		fmt.Println("Key does not exist")
+		k.m.Unlock()
+		fmt.Printf("Key: %s does not exist\n", name)
 		return false
 	}
 
 	delete(k.Keys, name)
+	k.m.Unlock()
 	k.SaveDB()
 	return true
 }
 
 func (k *KeyBase) SaveDB() {
-
+	k.m.Lock()
 	data, err := json.Marshal(k.Keys)
 	if err != nil {
 		fmt.Println("SAVEKEY: " + err.Error())
+		k.m.Unlock()
 		return
 	}
 
 	err = os.WriteFile("KeyDB", data, 0666)
 	if err != nil {
 		fmt.Println("SAVEKEY: " + err.Error())
+		k.m.Unlock()
 		return
 	}
+	k.m.Unlock()
 }
 
 func (k *KeyBase) ReadDB() {
+	k.m.Lock()
 	data, err := os.ReadFile("KeyDB")
 	if err != nil {
 		fmt.Println("READKEY: " + err.Error())
+		k.m.Unlock()
 		return
 	}
 
 	err = json.Unmarshal(data, &k.Keys)
 	if err != nil {
 		fmt.Println("READKEY: " + err.Error())
+		k.m.Unlock()
 		return
 	}
 	fmt.Println("Inserted KEYDB File")
+	k.m.Unlock()
 }
