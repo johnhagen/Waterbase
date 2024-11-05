@@ -27,10 +27,6 @@ func (d *CacheDB) Init(lifeTime int, maxEntries int) {
 }
 
 func (c *CacheDB) Insert(name string, data []byte) *[]byte {
-	//if _, exist := c.cacheData[name]; exist {
-	//fmt.Println("Cached entry already exists")
-	//return nil
-	//}
 	c.m.Lock()
 	if len(c.cacheData) >= c.maxEntries {
 		fmt.Println("Max cache entries reached")
@@ -57,8 +53,7 @@ func (c *CacheDB) Get(name string) *[]byte {
 
 	tNow := time.Now()
 
-	diff := tNow.Sub(c.cacheData[name].creationTime)
-	if int(diff.Seconds()) > c.maxCacheLifeTime {
+	if int(tNow.Sub(c.cacheData[name].creationTime).Seconds()) > c.maxCacheLifeTime {
 		c.m.Unlock()
 		fmt.Println("Cached data is to old: " + name)
 		return nil
@@ -89,7 +84,6 @@ func (c *CacheDB) PurgeCacheWorker(checkTimer int) {
 	for {
 		time.Sleep(time.Duration(checkTimer) * time.Second)
 		c.m.Lock()
-		//fmt.Println("Purge: Start")
 		tNow := time.Now()
 		for f, g := range c.cacheData {
 			if int(tNow.Sub(g.creationTime).Seconds()) > c.maxCacheLifeTime {
@@ -97,7 +91,6 @@ func (c *CacheDB) PurgeCacheWorker(checkTimer int) {
 				delete(c.cacheData, f)
 			}
 		}
-		//fmt.Println("Purge: Done")
 		c.m.Unlock()
 	}
 }

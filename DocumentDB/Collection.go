@@ -13,7 +13,7 @@ import (
 func (c *Collection) CreateNewDocument(name string, owner string, content interface{}) bool {
 
 	DocDB.M.Lock()
-	_, err := os.Stat(consts.DEFAULT_SAVE + c.ServiceName + "/" + c.Name + "/" + name)
+	_, err := os.Stat(consts.DEFAULT_SAVE_LOCATION + c.ServiceName + "/" + c.Name + "/" + name)
 	if err == nil {
 		fmt.Println("Document already exists")
 		DocDB.M.Unlock()
@@ -26,7 +26,7 @@ func (c *Collection) CreateNewDocument(name string, owner string, content interf
 	document.UpdatedBy = owner
 	document.Content = content
 
-	document.SaveDocument(consts.DEFAULT_SAVE + c.ServiceName + "/" + c.Name)
+	document.SaveDocument(consts.DEFAULT_SAVE_LOCATION + c.ServiceName + "/" + c.Name)
 	fmt.Println("Service: " + c.ServiceName + " - Created document: " + name)
 	DocDB.M.Unlock()
 	return true
@@ -37,7 +37,7 @@ func (c *Collection) GetDocument(name string) *Document {
 
 	cachedData := CacheMem.Cache.Get("doc-" + name)
 	if cachedData == nil {
-		file, err := os.ReadFile(consts.DEFAULT_SAVE + c.ServiceName + "/" + c.Name + "/" + name)
+		file, err := os.ReadFile(consts.DEFAULT_SAVE_LOCATION + c.ServiceName + "/" + c.Name + "/" + name)
 		if err != nil {
 			fmt.Println(err.Error())
 			DocDB.M.Unlock()
@@ -63,7 +63,7 @@ func (c *Collection) GetDocument(name string) *Document {
 func (c *Collection) DeleteDocument(name string) bool {
 
 	DocDB.M.Lock()
-	err := os.Remove(consts.DEFAULT_SAVE + c.ServiceName + "/" + c.Name + "/" + name)
+	err := os.Remove(consts.DEFAULT_SAVE_LOCATION + c.ServiceName + "/" + c.Name + "/" + name)
 	if err != nil {
 		fmt.Println(err.Error())
 		DocDB.M.Unlock()

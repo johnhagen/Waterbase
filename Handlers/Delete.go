@@ -113,11 +113,7 @@ func DeleteDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serString := Utils.IsString(body["servicename"])
-	colString := Utils.IsString(body["collectionname"])
-	docString := Utils.IsString(body["documentname"])
-
-	if !serString || !colString || !docString {
+	if !Utils.IsString(body["servicename"]) || !Utils.IsString(body["collectionname"]) || !Utils.IsString(body["documentname"]) {
 		fmt.Println("Missing servicename, collectionname or documentname")
 		http.Error(w, "", http.StatusBadRequest)
 		return

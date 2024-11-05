@@ -12,36 +12,37 @@ import (
 var KeyDB KeyBase
 
 type KeyBase struct {
-	m         sync.Mutex
-	Keys      map[string]string `json:"keys"`
-	KeyLength int               `json:"keyLength"`
-	AdminKey  string            `json:"adminKey"`
+	m             sync.Mutex
+	keys          map[string]string
+	keyLength     int
+	adminKey      string
+	encryptionKey []byte
 }
 
-func (k *KeyBase) Init(adminKey string, keyLength int) {
-	// Map service name to key
-	k.Keys = make(map[string]string)
-	k.AdminKey = adminKey
-	k.KeyLength = keyLength
+func (k *KeyBase) Init(adminKey string, keyLength int, encryptionKey []byte) {
+	k.keys = make(map[string]string)
+	k.adminKey = adminKey
+	k.keyLength = keyLength
+	k.encryptionKey = encryptionKey
 }
 
 func (k *KeyBase) CreateAuthenticationKey(name string, keylength int, seed int) (string, bool) {
 
 	k.m.Lock()
-	if _, exist := k.Keys[name]; exist {
+	if _, exist := k.keys[name]; exist {
 		fmt.Println("Key already exists to that name")
 		k.m.Unlock()
 		return "", false
 	}
 
 	char := []rune("1234567890ABCDEF")
-	key := ""
+	var key string
 
 	for i := 1; i < keylength; i++ {
 		key += string(char[rand.Intn(seed)%len(char)])
 	}
 
-	k.Keys[name] = key
+	k.keys[name] = key
 	k.m.Unlock()
 	return key, true
 }
@@ -59,7 +60,7 @@ func (k *KeyBase) CheckForAuth(s map[string]interface{}) bool {
 	}
 
 	if adminKeyPresent {
-		if s["adminkey"].(string) == k.AdminKey {
+		if s["adminkey"].(string) == k.adminKey {
 			k.m.Unlock()
 			fmt.Println("Authenticated")
 			return true
@@ -68,7 +69,7 @@ func (k *KeyBase) CheckForAuth(s map[string]interface{}) bool {
 
 	if authKeyPresent {
 		if Utils.IsString(s["servicename"]) {
-			if s["auth"].(string) == k.Keys[s["servicename"].(string)] {
+			if s["auth"].(string) == k.keys[s["servicename"].(string)] {
 				k.m.Unlock()
 				return true
 			}
@@ -99,13 +100,13 @@ func (k *KeyBase) CheckAuthenticationKey(s map[string]interface{}) bool {
 		return false
 	}
 
-	if _, exist := k.Keys[s["servicename"].(string)]; !exist {
+	if _, exist := k.keys[s["servicename"].(string)]; !exist {
 		fmt.Println("Key does not exist")
 		k.m.Unlock()
 		return false
 	}
 
-	if s["auth"].(string) == k.Keys[s["servicename"].(string)] {
+	if s["auth"].(string) == k.keys[s["servicename"].(string)] {
 		//fmt.Println("Key: " + k.Keys[s["servicename"].(string)] + " for service: " + s["servicename"].(string) + " is authenticated")
 		k.m.Unlock()
 		return true
@@ -125,7 +126,7 @@ func (k *KeyBase) CheckAdminKey(s map[string]interface{}) bool {
 		return false
 	}
 
-	if k.AdminKey == s["adminkey"].(string) {
+	if k.adminKey == s["adminkey"].(string) {
 		//fmt.Println("Admin key match")
 		k.m.Unlock()
 		return true
@@ -138,25 +139,25 @@ func (k *KeyBase) CheckAdminKey(s map[string]interface{}) bool {
 
 func (k *KeyBase) DeleteKey(name string) bool {
 
-	if _, exist := k.Keys[name]; !exist {
+	if _, exist := k.keys[name]; !exist {
 		fmt.Println("Key does not exist")
 		return false
 	}
 
-	delete(k.Keys, name)
+	delete(k.keys, name)
 	k.SaveDB()
 	return true
 }
 
 func (k *KeyBase) SaveDB() {
 
-	data, err := json.Marshal(k.Keys)
+	data, err := json.Marshal(k.keys)
 	if err != nil {
 		fmt.Println("SAVEKEY: " + err.Error())
 		return
 	}
 
-	err = os.WriteFile("KeyDB", data, 0666)
+	err = os.WriteFile("KeyDB", data, 0600)
 	if err != nil {
 		fmt.Println("SAVEKEY: " + err.Error())
 		return
@@ -164,16 +165,62 @@ func (k *KeyBase) SaveDB() {
 }
 
 func (k *KeyBase) ReadDB() {
+
 	data, err := os.ReadFile("KeyDB")
 	if err != nil {
 		fmt.Println("READKEY: " + err.Error())
 		return
 	}
 
-	err = json.Unmarshal(data, &k.Keys)
+	err = json.Unmarshal(data, &k.keys)
 	if err != nil {
 		fmt.Println("READKEY: " + err.Error())
 		return
 	}
 	fmt.Println("Inserted KEYDB File")
+}
+
+func (k *KeyBase) SaveDB2() {
+
+	data, err := json.Marshal(k.keys)
+	if err != nil {
+		fmt.Println("SAVEKEY: " + err.Error())
+		return
+	}
+
+	encryptedData := Utils.Encrypt(string(k.encryptionKey), string(data))
+
+	err = os.WriteFile("KeyDB", []byte(encryptedData), 0600)
+	if err != nil {
+		fmt.Println("SAVEKEY: " + err.Error())
+		return
+	}
+}
+
+func (k *KeyBase) ReadDB2() {
+
+	data, err := os.ReadFile("KeyDB")
+	if err != nil {
+		fmt.Println("READKEY: " + err.Error())
+		return
+	}
+
+	decryptedData := Utils.Decrypt(string(k.encryptionKey), string(data))
+
+	err = json.Unmarshal([]byte(decryptedData), &k.keys)
+	if err != nil {
+		fmt.Println("READKEY: " + err.Error())
+		return
+	}
+	fmt.Println("Inserted KEYDB File")
+}
+
+func (k *KeyBase) encrypt(data string) string {
+	encode := Utils.Base64Encode(data)
+	return Utils.EncryptAES(k.encryptionKey, string(encode))
+}
+
+func (k *KeyBase) decrypt(data string) string {
+	decrypt := Utils.DecryptAES(k.encryptionKey, data)
+	return string(Utils.Base64Decode(decrypt))
 }

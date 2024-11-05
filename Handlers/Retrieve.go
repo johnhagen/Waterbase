@@ -14,7 +14,7 @@ func RetrieveHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		RetrieveGetHandler(w, r)
 	default:
-
+		http.Error(w, "", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -91,8 +91,6 @@ func GetCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//fmt.Println(yes)
-
 	jsonData, err := json.Marshal(&yes)
 	if err != nil {
 		fmt.Println("fuck off col")
@@ -116,8 +114,6 @@ func GetDocument(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := Utils.ReadHeader(r)
-
-	//fmt.Println(data)
 
 	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {

@@ -1,5 +1,6 @@
-let serverURL = "http://localhost:8080"
-//let serverURL = "https://waterbase.hagen.fun"
+
+// Maybe unsafe in some curcumstances?
+let serverURL = location.origin;
 
 function EmptyContents() {
     document.getElementsByClassName("docContentsInsides")[0].innerText = "";

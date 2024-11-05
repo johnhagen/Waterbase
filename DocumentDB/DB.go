@@ -55,7 +55,7 @@ func (d *DocumentDB) InitDB() {
 func (d *DocumentDB) CreateNewService(r Service) bool {
 
 	d.M.Lock()
-	_, err := os.ReadFile(consts.DEFAULT_SAVE + r.Name + "__")
+	_, err := os.ReadFile(consts.DEFAULT_SAVE_LOCATION + r.Name + "__")
 	if err == nil {
 		fmt.Println("Service already exists: " + r.Name)
 		d.M.Unlock()
@@ -66,7 +66,7 @@ func (d *DocumentDB) CreateNewService(r Service) bool {
 	service.Collections = make(map[string]*Collection)
 	service.Name = r.Name
 	service.Owner = r.Owner
-	service.SaveService(consts.DEFAULT_SAVE)
+	service.SaveService(consts.DEFAULT_SAVE_LOCATION)
 
 	fmt.Println("Created service: " + r.Name)
 	d.M.Unlock()
@@ -79,8 +79,7 @@ func (d *DocumentDB) GetService(name string) *Service {
 
 	cachedData := CacheMem.Cache.Get("ser-" + name)
 	if cachedData == nil {
-		fmt.Println("Cache Miss")
-		file, err := os.ReadFile(consts.DEFAULT_SAVE + name + "__")
+		file, err := os.ReadFile(consts.DEFAULT_SAVE_LOCATION + name + "__")
 		if err != nil {
 			fmt.Println(err.Error())
 			d.M.Unlock()
@@ -114,9 +113,8 @@ func (d *DocumentDB) DeleteService(name string) bool {
 
 	Auth.KeyDB.DeleteKey(name)
 	CacheMem.Cache.Delete("ser-" + name)
-	os.RemoveAll("./Save/" + name + "/")
-	os.Remove("./Save/" + name + "__")
-
+	os.RemoveAll(consts.DEFAULT_SAVE_LOCATION + name + "/")
+	os.Remove(consts.DEFAULT_SAVE_LOCATION + name + "__")
 	d.M.Unlock()
 	return true
 }

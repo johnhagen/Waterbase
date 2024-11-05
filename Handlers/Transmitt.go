@@ -17,7 +17,7 @@ func TransmittHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		TransmittGetHandler(w, r)
 	default:
-		http.Error(w, "", http.StatusBadRequest)
+		http.Error(w, "", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -45,7 +45,7 @@ func TransmittGetServices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	services, err := os.ReadDir(consts.DEFAULT_SAVE)
+	services, err := os.ReadDir(consts.DEFAULT_SAVE_LOCATION)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		fmt.Println(err.Error())
@@ -91,7 +91,7 @@ func TransmittGetCollections(w http.ResponseWriter, r *http.Request) {
 
 	var colNames []string
 
-	files, err := os.ReadDir(consts.DEFAULT_SAVE + service.Name + "/")
+	files, err := os.ReadDir(consts.DEFAULT_SAVE_LOCATION + service.Name + "/")
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
@@ -129,7 +129,7 @@ func TransmittGetDocuments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files, err := os.ReadDir(consts.DEFAULT_SAVE + data["servicename"].(string) + "/" + data["collectionname"].(string) + "/")
+	files, err := os.ReadDir(consts.DEFAULT_SAVE_LOCATION + data["servicename"].(string) + "/" + data["collectionname"].(string) + "/")
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return

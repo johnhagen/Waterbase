@@ -23,16 +23,13 @@ func main() {
 		log.Println("Preconfigured port not found: $PORT. Defaults to 8080")
 		port = "8080"
 	}
-
-	CacheMem.Cache.Init(15, 1000)
-	Auth.KeyDB.Init("Keks", 200)
+	Cache := &CacheMem.Cache
+	Cache.Init(15, 1000)
+	Auth.KeyDB.Init("Keks", 200, []byte("thisis32bitlongpassphraseimusing"))
 	DocumentDB.DocDB.InitDB()
 	Auth.KeyDB.ReadDB()
 
 	router := SetupRouter()
-
-	// Start cache purge worker
-	go CacheMem.Cache.PurgeCacheWorker(20)
 
 	// Start HTTP Server
 	log.Println("Starting server on port " + port + "...")
@@ -47,7 +44,6 @@ func SetupRouter() http.Handler {
 	r.HandleFunc("/waterbase/register", handlers.RegisterHandler)
 	r.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
 	r.HandleFunc("/waterbase/remove", handlers.RemoveHandler)
-	//r.HandleFunc("/waterbase/admin", handlers.AdminHandler)
 
 	staticFileDir := http.Dir("./dashboard/")
 

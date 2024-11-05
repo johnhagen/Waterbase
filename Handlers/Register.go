@@ -8,17 +8,16 @@ import (
 	"net/http"
 	"strings"
 	"waterbase/Auth"
-	"waterbase/Debug"
 	"waterbase/DocumentDB"
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-
 	switch r.Method {
 	case http.MethodPost:
 		RegisterPostHandler(w, r)
+	default:
+		http.Error(w, "", http.StatusMethodNotAllowed)
 	}
-
 }
 
 func RegisterPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,10 +41,6 @@ func RegisterPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterService(w http.ResponseWriter, r *http.Request) {
-
-	if Debug.DebugMode {
-		fmt.Println("Registering new service")
-	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -101,7 +96,6 @@ func RegisterService(w http.ResponseWriter, r *http.Request) {
 	if !success {
 		http.Error(w, "Failed to create a new service. Maybe it exists already?", http.StatusBadGateway)
 		fmt.Println("Failed to create a new service")
-		fmt.Println(service)
 		return
 	}
 
@@ -239,62 +233,5 @@ func RegisterDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//DocumentDB.DocDB.GetService(servicename).GetCollection(collectionname).GetDocument(name).SaveDocument("./Save/" + servicename + "/" + collectionname)
-
 	http.Error(w, "", http.StatusAccepted)
 }
-
-/*
-URL EXAMPLE
-
-Register service:
-http://localhost:8080/register?type=service
-body JSON
-{
-	name: "bfvbot" string
-	owner: "John" string
-	adminkey: <key> int
-}
-
-Resp: HTTP Status code
-
-
-Register collection:
-http://localhost:8080/register?type=collection
-{
-	servicename: "bfvbot" string
-	name: "cheaters" string
-	owner: "John"
-	auth: <key>
-}
-
-
-Register document:
-http://localhost:8080/register?type=document
-{
-	servicename: "bfvbot" string
-	collectionname: "cheaters" string
-	name: "TeamKriss" string
-	content: interface{}
-}
-
-
-
-
-
-
-*/
-
-/*
-JSON EXAMPLE
-
-{
-	name: bfvbot
-	owner: John
-
-}
-
-
-
-
-*/

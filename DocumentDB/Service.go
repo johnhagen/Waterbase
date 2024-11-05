@@ -13,7 +13,7 @@ import (
 func (s *Service) CreateNewCollection(name string, owner string) bool {
 	DocDB.M.Lock()
 
-	_, err := os.Stat(consts.DEFAULT_SAVE + s.Name + "/" + name)
+	_, err := os.Stat(consts.DEFAULT_SAVE_LOCATION + s.Name + "/" + name)
 	if err == nil {
 		fmt.Println("Collection named: " + name + " already exist")
 		DocDB.M.Unlock()
@@ -28,7 +28,7 @@ func (s *Service) CreateNewCollection(name string, owner string) bool {
 	collection.Owner = owner
 	collection.LastUpdated = "temp"
 
-	collection.SaveCollection(consts.DEFAULT_SAVE + s.Name + "/")
+	collection.SaveCollection(consts.DEFAULT_SAVE_LOCATION + s.Name + "/")
 	fmt.Println("Service: " + s.Name + " - Created collection: " + name)
 	DocDB.M.Unlock()
 	return true
@@ -61,7 +61,7 @@ func (s *Service) GetCollection(name string) *Collection {
 
 	cachedData := CacheMem.Cache.Get("col-" + name)
 	if cachedData == nil {
-		file, err := os.ReadFile(consts.DEFAULT_SAVE + s.Name + "/" + name + "__")
+		file, err := os.ReadFile(consts.DEFAULT_SAVE_LOCATION + s.Name + "/" + name + "__")
 		if err != nil {
 			fmt.Println(err.Error())
 			DocDB.M.Unlock()
