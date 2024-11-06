@@ -25,7 +25,7 @@ func main() {
 	}
 	Cache := &CacheMem.Cache
 	Cache.Init(15, 1000)
-	Auth.KeyDB.Init("Keks", 200, []byte("thisis32bitlongpassphraseimusing"))
+	Auth.KeyDB.Init(os.Getenv("ADMINPASS"), 200)
 	DocumentDB.DocDB.InitDB()
 	Auth.KeyDB.ReadDB()
 
