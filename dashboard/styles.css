@@ -81,12 +81,12 @@ body {
 
 .column {
     flex: 1;
-    max-width: 22%;
+    max-width: 20%;
     height: inherit;
     overflow-y: scroll;
     scroll-behavior: smooth;
     padding: 4px;
-    margin: -1px;
+    margin: 5px;
     border: solid;
     border-color: #deb992;
     border-width: 1px;
