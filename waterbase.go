@@ -44,6 +44,7 @@ func SetupRouter() http.Handler {
 	r.HandleFunc("/waterbase/register", handlers.RegisterHandler)
 	r.HandleFunc("/waterbase/retrieve", handlers.RetrieveHandler)
 	r.HandleFunc("/waterbase/remove", handlers.RemoveHandler)
+	r.HandleFunc("/", handlers.RootHandler)
 
 	staticFileDir := http.Dir("./dashboard/")
 
