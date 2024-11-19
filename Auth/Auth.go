@@ -56,8 +56,6 @@ func (k *KeyBase) CreateAuthenticationKey(name string, keylength int, seed int) 
 func (k *KeyBase) CheckForAuth(s map[string]interface{}) bool {
 	k.m.Lock()
 
-	fmt.Println(s)
-
 	authKeyPresent := Utils.IsString(s["auth"])
 	adminKeyPresent := Utils.IsString(s["adminkey"])
 
@@ -72,6 +70,8 @@ func (k *KeyBase) CheckForAuth(s map[string]interface{}) bool {
 			k.m.Unlock()
 			fmt.Println("Authenticated")
 			return true
+		} else {
+			fmt.Println("Bad Adminkey")
 		}
 	}
 

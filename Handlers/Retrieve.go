@@ -37,6 +37,7 @@ func GetService(w http.ResponseWriter, r *http.Request) {
 	data := Utils.ReadHeader(r)
 
 	fmt.Println(data)
+	delete(data, "adminkey")
 
 	Authenticated := Auth.KeyDB.CheckForAuth(data)
 	if !Authenticated {
