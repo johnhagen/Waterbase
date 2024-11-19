@@ -3,3 +3,4 @@ KeyDB
 Save
 go.mod
 go.sum
+.env

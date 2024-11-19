@@ -16,18 +16,24 @@
     <button onclick=UpdateServices() class="pageButton">Add Cards</button> 
     <div id="statusDiv"></div>
     </header>
-    <div class="container-head">
-        <h2>Services</h2>
-        <h2>Collections</h2>
-        <h2>Documents</h2>
-        <h2 class="documentContent">Contents</h2>
-    </div>
     <div class="container">
-        <div class="column" id="column-services"></div>
-        <div class="column" id="column-collections"></div>
-        <div class="column" id="column-documents"></div>
-        <div class="docContents">
-            <p class="docContentsInsides"></p>
+        <div class="column-holder">
+            <h2>Services</h2>
+            <div class="column" id="column-services"></div>
+        </div>
+        <div class="column-holder">
+            <h2>Collections</h2>
+            <div class="column" id="column-collections"></div>
+        </div>
+        <div class="column-holder">
+            <h2>Documents</h2>
+            <div class="column" id="column-documents"></div>
+        </div>
+        <div class="column-holder" id="contentsColumn">
+            <h2>Contents</h2>
+            <div class="docContents">
+                <p class="docContentsInsides"></p>
+            </div>
         </div>
     </div>
     <script src="code.js"></script>

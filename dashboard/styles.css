@@ -2,10 +2,11 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #051622;
+    background-color: #0E2C40;
 }
 
 .page-header {
+    background-color: #1A4A5A;
     vertical-align: center;
     display: flex;
     width: auto;
@@ -63,7 +64,7 @@ body {
     display: flex;
     justify-content: center;
     flex: 1;
-    margin-top: 10px;
+    margin: 20px;
 }
 
 .container-head > h2 {
@@ -79,9 +80,28 @@ body {
     margin: 0;
 }
 
+.column-holder {
+    width: 22%;
+    border: solid;
+    background-color: #1A4A5A;
+    border-width: 1px;
+    height: 90%;
+}
+
+.column-holder > h2 {
+    width: 100%;
+    color: #deb992;
+    text-align: center;
+
+}
+
+#contentsColumn {
+    width: 33%;
+}
+
 .column {
     flex: 1;
-    max-width: 20%;
+    width: 93%;
     height: inherit;
     overflow-y: scroll;
     scroll-behavior: smooth;
@@ -90,6 +110,7 @@ body {
     border: solid;
     border-color: #deb992;
     border-width: 1px;
+    border-radius: 10px;
 }
 
 .card {
@@ -129,13 +150,14 @@ body {
     flex-wrap: wrap;
     height: inherit;
     max-height: inherit;
-    width: 34%;
+    width: 95%;
     padding: 4px;
-    margin: -1px;
+    margin: 5px;
     border: solid;
     color: #dac6b3;
     border-color: #deb992;
     border-width: 1px;
+    border-radius: 10px;
 }
 
 .docContentsInsides {

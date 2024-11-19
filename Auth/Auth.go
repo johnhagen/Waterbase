@@ -3,6 +3,7 @@ package Auth
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"sync"
@@ -23,6 +24,9 @@ func (k *KeyBase) Init(adminKey string, keyLength int) {
 	k.m.Lock()
 	// Map service name to key
 	k.keys = make(map[string]string)
+	if adminKey == "" {
+		log.Fatal("AUTH: Invalid AdminKey Specified")
+	}
 	k.adminKey = adminKey
 	k.keyLength = keyLength
 	k.m.Unlock()
@@ -51,6 +55,8 @@ func (k *KeyBase) CreateAuthenticationKey(name string, keylength int, seed int) 
 
 func (k *KeyBase) CheckForAuth(s map[string]interface{}) bool {
 	k.m.Lock()
+
+	fmt.Println(s)
 
 	authKeyPresent := Utils.IsString(s["auth"])
 	adminKeyPresent := Utils.IsString(s["adminkey"])

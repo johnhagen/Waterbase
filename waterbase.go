@@ -10,12 +10,18 @@ import (
 	handlers "waterbase/Handlers"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 
 	// Setting up port for HTTP Server
 	// Get PORT env variable if present (In this case not)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	port := os.Getenv("PORT")
 
 	// Else setup port manually
@@ -25,7 +31,7 @@ func main() {
 	}
 	Cache := &CacheMem.Cache
 	Cache.Init(15, 1000)
-	Auth.KeyDB.Init(os.Getenv("ADMINPASS"), 200)
+	Auth.KeyDB.Init(os.Getenv("ADMIN_PASS"), 200)
 	DocumentDB.DocDB.InitDB()
 	Auth.KeyDB.ReadDB()
 
